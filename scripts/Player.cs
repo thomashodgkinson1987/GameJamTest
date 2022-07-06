@@ -9,6 +9,8 @@ public class Player : KinematicBody2D
 
 	public enum EFacingDirection { Left, Right }
 
+	public enum EBulletType { Standard, Rifle, MachineGun, SniperRifle }
+
 	#endregion // Enums
 
 
@@ -16,6 +18,7 @@ public class Player : KinematicBody2D
 	#region Nodes
 
 	public Sprite node_sprite;
+	public Line2D node_aimingLine;
 	public CollisionShape2D node_collisionShape2D;
 	public Position2D node_projectileSpawnPosition;
 
@@ -74,6 +77,7 @@ public class Player : KinematicBody2D
 	public bool WasThrowGrenadeReleased { get; set; } = false;
 
 	[Export] public bool IsInfiniteJumps { get; set; } = true;
+	[Export] public bool IsInfiniteAmmo { get; set; } = true;
 	[Export] public bool IsInfiniteGrenades { get; set; } = true;
 
 	[Export] public bool HasPaintShoes { get; set; } = false;
@@ -85,13 +89,23 @@ public class Player : KinematicBody2D
 	[Export] public float GrenadeThrowTimeLimit { get; set; } = 1f;
 	[Export] public float GrenadeThrowTimer { get; set; } = 0f;
 
+	[Export] public float AimingLineLength { get; set; } = 16f;
+
+	[Export] public EBulletType BulletType { get; set; } = EBulletType.Standard;
+
+	[Export] public float PowerGaugeLimit { get; set; } = 100f;
+	[Export] public float PowerGaugeCurrent { get; set; } = 100f;
+	[Export] public float PowerGaugeRechargeRate { get; set; } = 0.5f;
+
+	[Export] public float StandardBulletPowerCost { get; set; } = 10f;
+	[Export] public int RifleBullets { get; set; } = 8;
+	[Export] public int MachineGunBullets { get; set; } = 8;
+	[Export] public int SniperRifleBullets { get; set; } = 8;
+
+	[Export] public float MachineGunFireRate { get; set; } = 0.1f;
+	[Export] public float MachineGunFireRateTimer { get; set; } = 0f;
+
 	#endregion // Properties
-
-
-
-	#region Fields
-
-	#endregion // Fields
 
 
 
@@ -100,13 +114,16 @@ public class Player : KinematicBody2D
 	public override void _EnterTree ()
 	{
 		node_sprite = GetNode<Sprite>("Sprite");
+		node_aimingLine = GetNode<Line2D>("AimingLine");
 		node_collisionShape2D = GetNode<CollisionShape2D>("CollisionShape2D");
 		node_projectileSpawnPosition = GetNode<Position2D>("ProjectileSpawnPosition");
 	}
 
 	public override void _Ready ()
 	{
-		node_sprite.SelfModulate = PaintColors.GetColorFromPaintColor(PaintColor);
+		Color color = PaintColors.GetColorFromPaintColor(PaintColor);
+		node_sprite.SelfModulate = color;
+		node_aimingLine.DefaultColor = color;
 	}
 
 	#endregion // Godot methods
@@ -118,7 +135,20 @@ public class Player : KinematicBody2D
 	public void SetPaintColor (EPaintColor paintColor)
 	{
 		PaintColor = paintColor;
-		node_sprite.SelfModulate = PaintColors.GetColorFromPaintColor(paintColor);
+		Color color = PaintColors.GetColorFromPaintColor(paintColor);
+		node_sprite.SelfModulate = color;
+		node_aimingLine.DefaultColor = color;
+	}
+
+	public void SetAimingLineDirection (Vector2 direction)
+	{
+		direction = direction.Normalized();
+		direction *= AimingLineLength;
+		node_aimingLine.SetPointPosition(1, direction);
+	}
+	public void SetAimingLineDirection (float x, float y)
+	{
+		SetAimingLineDirection(new Vector2(x, y));
 	}
 
 	#endregion // Public methods

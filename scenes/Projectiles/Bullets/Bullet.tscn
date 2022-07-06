@@ -10,6 +10,8 @@ radius = 4.0
 collision_layer = 4
 collision_mask = 8
 script = ExtResource( 2 )
+IsDieAfterDistanceLimitReached = true
+DistanceLimit = 64.0
 ExplosionRadius = 4.0
 
 [node name="Sprite" type="Sprite" parent="."]

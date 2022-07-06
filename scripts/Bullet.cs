@@ -4,20 +4,10 @@ using Godot;
 public class Bullet : Projectile
 {
 
-	#region Nodes
-
-	#endregion // Nodes
-
-
-
 	#region Properties
 
+	[Export] public float Speed { get; set; } = 64f;
+
 	#endregion // Properties
-
-
-
-	#region Godot methods
-
-	#endregion // Godot methods
 
 }

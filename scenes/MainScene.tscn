@@ -1,22 +1,26 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://resources/tilesets/tileset_0001.tres" type="TileSet" id=1]
 [ext_resource path="res://scripts/MainSceneController.cs" type="Script" id=2]
 [ext_resource path="res://scenes/LightMask.tscn" type="PackedScene" id=3]
 [ext_resource path="res://scenes/Player.tscn" type="PackedScene" id=4]
-[ext_resource path="res://scenes/Bullet.tscn" type="PackedScene" id=5]
-[ext_resource path="res://scenes/Grenade.tscn" type="PackedScene" id=6]
+[ext_resource path="res://scenes/Projectiles/Bullets/SniperRifleBullet.tscn" type="PackedScene" id=5]
+[ext_resource path="res://scenes/Projectiles/Grenade.tscn" type="PackedScene" id=6]
+[ext_resource path="res://scenes/Projectiles/Bullets/RifleBullet.tscn" type="PackedScene" id=7]
+[ext_resource path="res://scenes/Projectiles/Bullets/StandardBullet.tscn" type="PackedScene" id=8]
+[ext_resource path="res://scenes/Projectiles/Bullets/MachineGunBullet.tscn" type="PackedScene" id=9]
 
 [node name="MainScene" type="Node2D"]
 script = ExtResource( 2 )
 __meta__ = {
 "_edit_lock_": true
 }
-m_bulletPackedScene = ExtResource( 5 )
+m_standardBulletPackedScene = ExtResource( 8 )
+m_rifleBulletPackedScene = ExtResource( 7 )
+m_machineGunBulletPackedScene = ExtResource( 9 )
+m_sniperRifleBulletPackedScene = ExtResource( 5 )
 m_grenadePackedScene = ExtResource( 6 )
 m_lightMaskPackedScene = ExtResource( 3 )
-m_isUsingKeyboardAndMouse = false
-m_isUsingController = true
 
 [node name="TileMap" type="TileMap" parent="."]
 tile_set = ExtResource( 1 )
@@ -33,8 +37,14 @@ __meta__ = {
 position = Vector2( 272, 288 )
 
 [node name="Bullets" type="Node2D" parent="."]
+__meta__ = {
+"_edit_lock_": true
+}
 
 [node name="Grenades" type="Node2D" parent="."]
+__meta__ = {
+"_edit_lock_": true
+}
 
 [node name="LightMasks" type="Node2D" parent="."]
 __meta__ = {
@@ -42,9 +52,21 @@ __meta__ = {
 }
 
 [node name="BulletSpawnParticles" type="Node2D" parent="."]
+__meta__ = {
+"_edit_lock_": true
+}
 
 [node name="GrenadeSpawnParticles" type="Node2D" parent="."]
+__meta__ = {
+"_edit_lock_": true
+}
 
 [node name="BulletDieParticles" type="Node2D" parent="."]
+__meta__ = {
+"_edit_lock_": true
+}
 
 [node name="GrenadeDieParticles" type="Node2D" parent="."]
+__meta__ = {
+"_edit_lock_": true
+}

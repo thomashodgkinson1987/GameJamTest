@@ -37,6 +37,10 @@ public class Projectile : KinematicBody2D
 		set => _lifetimeTimer = Mathf.Max(0, value);
 	}
 
+	[Export] public bool IsDieAfterDistanceLimitReached { get; set; } = false;
+	[Export] public float DistanceLimit { get; set; } = 128f;
+	[Export] public float DistanceTravelled { get; set; } = 0f;
+
 	[Export] public Vector2 Velocity { get; set; } = new Vector2(64f, 0f);
 
 	private float _explosionRadius = 8f;

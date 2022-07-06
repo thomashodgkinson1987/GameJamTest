@@ -28,7 +28,10 @@ public class MainSceneController : Node2D
 
 	#region Fields
 
-	[Export] private PackedScene m_bulletPackedScene;
+	[Export] private PackedScene m_standardBulletPackedScene;
+	[Export] private PackedScene m_rifleBulletPackedScene;
+	[Export] private PackedScene m_machineGunBulletPackedScene;
+	[Export] private PackedScene m_sniperRifleBulletPackedScene;
 	[Export] private PackedScene m_grenadePackedScene;
 	[Export] private PackedScene m_lightMaskPackedScene;
 
@@ -132,6 +135,23 @@ public class MainSceneController : Node2D
 		else if (Input.IsPhysicalKeyPressed((int)KeyList.Key7))
 		{
 			node_player.SetPaintColor(EPaintColor.Fuchsia);
+		}
+
+		if (Input.IsPhysicalKeyPressed((int)KeyList.Q))
+		{
+			node_player.BulletType = Player.EBulletType.Standard;
+		}
+		else if (Input.IsPhysicalKeyPressed((int)KeyList.W))
+		{
+			node_player.BulletType = Player.EBulletType.Rifle;
+		}
+		else if (Input.IsPhysicalKeyPressed((int)KeyList.E))
+		{
+			node_player.BulletType = Player.EBulletType.MachineGun;
+		}
+		else if (Input.IsPhysicalKeyPressed((int)KeyList.R))
+		{
+			node_player.BulletType = Player.EBulletType.SniperRifle;
 		}
 	}
 
@@ -377,6 +397,8 @@ public class MainSceneController : Node2D
 			}
 		}
 
+		node_player.SetAimingLineDirection(node_player.AimingDirection);
+
 		if (node_player.AimingDirection.x < 0)
 		{
 			node_player.FacingDirection = Player.EFacingDirection.Left;
@@ -408,13 +430,93 @@ public class MainSceneController : Node2D
 			}
 		}
 
+		if (node_player.PowerGaugeCurrent < node_player.PowerGaugeLimit)
+		{
+			node_player.PowerGaugeCurrent += node_player.PowerGaugeRechargeRate;
+			if (node_player.PowerGaugeCurrent > node_player.PowerGaugeLimit)
+			{
+				node_player.PowerGaugeCurrent = node_player.PowerGaugeLimit;
+			}
+		}
+
 		if (node_player.IsShootPressed && !node_player.WasShootPressed)
 		{
 			Vector2 position = node_player.node_projectileSpawnPosition.GlobalPosition;
-			Vector2 velocity = node_player.AimingDirection * 128f;
-
+			Vector2 direction = node_player.AimingDirection;
 			EPaintColor paintColor = node_player.PaintColor;
-			SpawnBullet(position, velocity, paintColor);
+			Player.EBulletType bulletType = node_player.BulletType;
+
+			switch (node_player.BulletType)
+			{
+				case Player.EBulletType.Standard:
+					if (node_player.PowerGaugeCurrent >= node_player.StandardBulletPowerCost)
+					{
+						node_player.PowerGaugeCurrent -= node_player.StandardBulletPowerCost;
+						SpawnBullet(position, direction, paintColor, bulletType);
+					}
+					break;
+				case Player.EBulletType.Rifle:
+					if (node_player.RifleBullets > 0 || node_player.IsInfiniteAmmo)
+					{
+						if (!node_player.IsInfiniteAmmo)
+						{
+							node_player.RifleBullets--;
+						}
+						SpawnBullet(position, direction, paintColor, bulletType);
+					}
+					break;
+				case Player.EBulletType.MachineGun:
+					if (node_player.MachineGunBullets > 0 || node_player.IsInfiniteAmmo)
+					{
+						if (!node_player.IsInfiniteAmmo)
+						{
+							node_player.MachineGunBullets--;
+						}
+						SpawnBullet(position, direction, paintColor, bulletType);
+						node_player.MachineGunFireRateTimer = 0f;
+					}
+					break;
+				case Player.EBulletType.SniperRifle:
+					if (node_player.SniperRifleBullets > 0 || node_player.IsInfiniteAmmo)
+					{
+						if (!node_player.IsInfiniteAmmo)
+						{
+							node_player.SniperRifleBullets--;
+						}
+						SpawnBullet(position, direction, paintColor, bulletType);
+					}
+					break;
+				default:
+					if (node_player.PowerGaugeCurrent >= node_player.StandardBulletPowerCost)
+					{
+						node_player.PowerGaugeCurrent -= node_player.StandardBulletPowerCost;
+						SpawnBullet(position, direction, paintColor, bulletType);
+					}
+					break;
+			}
+		}
+		else if (node_player.IsShootPressed && node_player.WasShootPressed)
+		{
+			if (node_player.BulletType == Player.EBulletType.MachineGun)
+			{
+				node_player.MachineGunFireRateTimer += delta;
+				if (node_player.MachineGunFireRateTimer >= node_player.MachineGunFireRate)
+				{
+					if (node_player.MachineGunBullets > 0 || node_player.IsInfiniteAmmo)
+					{
+						if (!node_player.IsInfiniteAmmo)
+						{
+							node_player.MachineGunBullets--;
+						}
+						Vector2 position = node_player.node_projectileSpawnPosition.GlobalPosition;
+						Vector2 direction = node_player.AimingDirection;
+						EPaintColor paintColor = node_player.PaintColor;
+						Player.EBulletType bulletType = node_player.BulletType;
+						SpawnBullet(position, direction, paintColor, bulletType);
+					}
+					node_player.MachineGunFireRateTimer = 0f;
+				}
+			}
 		}
 
 		if (node_player.IsThrowGrenadePressed)
@@ -469,11 +571,30 @@ public class MainSceneController : Node2D
 
 			if (bullet.LifetimeTimer < bullet.Lifetime)
 			{
+				Vector2 oldPosition = bullet.Position;
+
 				KinematicCollision2D collision = bullet.MoveAndCollide(bullet.Velocity * delta);
+
+				Vector2 newPosition = bullet.Position;
+
+				float x = Mathf.Abs(newPosition.x - oldPosition.x);
+				float y = Mathf.Abs(newPosition.y - oldPosition.y);
+				float distance = new Vector2(x, y).Length();
+
+				bullet.DistanceTravelled += distance;
 
 				if (collision != null)
 				{
 					CauseExplosion(collision.Position, bullet.ExplosionRadius, bullet.PaintColor);
+
+					bullet.QueueFree();
+					node_bullets.RemoveChild(bullet);
+					m_bulletsList.RemoveAt(i);
+					i--;
+				}
+				else if (bullet.IsDieAfterDistanceLimitReached && bullet.DistanceTravelled >= bullet.DistanceLimit)
+				{
+					CauseExplosion(bullet.Position, bullet.ExplosionRadius, bullet.PaintColor);
 
 					bullet.QueueFree();
 					node_bullets.RemoveChild(bullet);
@@ -504,25 +625,7 @@ public class MainSceneController : Node2D
 			if (grenade.LifetimeTimer < grenade.Lifetime)
 			{
 				Vector2 velocity = grenade.Velocity;
-				float deceleration = 64f;
 				float gravity = 256f;
-
-				if (velocity.x < 0)
-				{
-					velocity.x += deceleration * delta;
-					if (velocity.x > 0)
-					{
-						velocity.x = 0;
-					}
-				}
-				else if (velocity.x > 0)
-				{
-					velocity.x -= deceleration * delta;
-					if (velocity.x < 0)
-					{
-						velocity.x = 0;
-					}
-				}
 
 				velocity.y += gravity * delta;
 
@@ -534,10 +637,12 @@ public class MainSceneController : Node2D
 
 					if (normal.x != 0)
 					{
+						velocity.x /= 2f;
 						velocity.x *= -1;
 					}
 					if (normal.y != 0)
 					{
+						velocity.x /= 2f;
 						velocity.y /= 2f;
 						velocity.y *= -1;
 					}
@@ -557,14 +662,34 @@ public class MainSceneController : Node2D
 		}
 	}
 
-	private Bullet SpawnBullet (Vector2 position, Vector2 velocity, EPaintColor paintColor)
+	private Bullet SpawnBullet (Vector2 position, Vector2 direction, EPaintColor paintColor, Player.EBulletType bulletType)
 	{
-		Bullet bullet = m_bulletPackedScene.Instance<Bullet>();
+		Bullet bullet;
+
+		switch (bulletType)
+		{
+			case Player.EBulletType.Standard:
+				bullet = m_standardBulletPackedScene.Instance<Bullet>();
+				break;
+			case Player.EBulletType.Rifle:
+				bullet = m_rifleBulletPackedScene.Instance<Bullet>();
+				break;
+			case Player.EBulletType.MachineGun:
+				bullet = m_machineGunBulletPackedScene.Instance<Bullet>();
+				break;
+			case Player.EBulletType.SniperRifle:
+				bullet = m_sniperRifleBulletPackedScene.Instance<Bullet>();
+				break;
+			default:
+				bullet = m_standardBulletPackedScene.Instance<Bullet>();
+				break;
+		}
+
 		node_bullets.AddChild(bullet);
 		m_bulletsList.Add(bullet);
 
 		bullet.Position = position;
-		bullet.Velocity = velocity;
+		bullet.Velocity = direction * bullet.Speed;
 		bullet.SetPaintColor(paintColor);
 
 		return bullet;
@@ -598,8 +723,6 @@ public class MainSceneController : Node2D
 
 		Godot.Collections.Array results = state.IntersectShape(foo, 256);
 
-		GD.Print(results.Count);
-
 		for (int i = 0; i < results.Count; i++)
 		{
 			object result = results[i];
@@ -607,12 +730,9 @@ public class MainSceneController : Node2D
 
 			if (dict.Contains("collider") && dict["collider"] is Area2D area)
 			{
-				if (area.GetParent() != null)
+				if (area.GetParent() != null && area.GetParent() is LightMask lightMask)
 				{
-					if (area.GetParent() is LightMask lightMask)
-					{
-						SetLightMaskColor(lightMask, paintColor);
-					}
+					SetLightMaskColor(lightMask, paintColor);
 				}
 			}
 		}
