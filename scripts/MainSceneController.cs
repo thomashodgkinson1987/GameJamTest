@@ -84,7 +84,7 @@ public class MainSceneController : Node2D
 
 	public override void _Input (InputEvent @event)
 	{
-		if (@event is InputEventKey)
+		if (@event is InputEventKey || @event is InputEventMouse)
 		{
 			m_isUsingKeyboardAndMouse = true;
 			m_isUsingController = false;
@@ -360,15 +360,21 @@ public class MainSceneController : Node2D
 			Vector2 mousePosition = GetGlobalMousePosition();
 			Vector2 diff = mousePosition - node_player.node_projectileSpawnPosition.GlobalPosition;
 			diff = diff.Normalized();
-			node_player.AimingDirection = diff;
+			if (diff.x != 0 || diff.y != 0)
+			{
+				node_player.AimingDirection = diff;
+			}
 		}
 		else if (m_isUsingController)
 		{
-			Vector2 rightAxisDirection = GetGlobalMousePosition();
-			Vector2 target = node_player.node_projectileSpawnPosition.GlobalPosition + rightAxisDirection;
+			Vector2 inputDirection = Input.GetVector("PlayerAimLeft", "PlayerAimRight", "PlayerAimUp", "PlayerAimDown");
+			Vector2 target = node_player.node_projectileSpawnPosition.GlobalPosition + inputDirection;
 			Vector2 diff = target - node_player.node_projectileSpawnPosition.GlobalPosition;
 			diff = diff.Normalized();
-			node_player.AimingDirection = diff;
+			if (diff.x != 0 || diff.y != 0)
+			{
+				node_player.AimingDirection = diff;
+			}
 		}
 
 		if (node_player.AimingDirection.x < 0)

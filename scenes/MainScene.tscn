@@ -15,6 +15,8 @@ __meta__ = {
 m_bulletPackedScene = ExtResource( 5 )
 m_grenadePackedScene = ExtResource( 6 )
 m_lightMaskPackedScene = ExtResource( 3 )
+m_isUsingKeyboardAndMouse = false
+m_isUsingController = true
 
 [node name="TileMap" type="TileMap" parent="."]
 tile_set = ExtResource( 1 )
