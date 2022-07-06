@@ -5,7 +5,21 @@ using static PaintColors;
 public class MainSceneController : Node2D
 {
 
+	#region Enums
+
+	public enum ESound
+	{
+		PlayerJump, PlayerLand,
+		StandardGunShoot, RifleShoot, MachineGunShoot, SniperRifleShoot
+	}
+
+	#endregion // Enums
+
+
+
 	#region Nodes
+
+	private Node node_oneShotSounds;
 
 	private TileMap node_tileMap;
 
@@ -22,6 +36,37 @@ public class MainSceneController : Node2D
 	private Node2D node_bulletDieParticles;
 	private Node2D node_grenadeDieParticles;
 
+	// UI
+
+
+	private TextureRect node_player1UI_playerIcon;
+
+	private TextureProgress node_player1UI_powerGauge;
+
+	private Control node_player1UI_grenadeUI;
+	private TextureRect node_player1UI_grenadeIcon;
+	private Label node_player1UI_grenadeCount;
+
+	private Control node_player1UI_rifleUI;
+	private TextureRect node_player1UI_rifleIcon;
+	private Label node_player1UI_rifleBulletCount;
+
+	private Control node_player1UI_machineGunUI;
+	private TextureRect node_player1UI_machineGunIcon;
+	private Label node_player1UI_machineGunBulletCount;
+
+	private Control node_player1UI_sniperRifleUI;
+	private TextureRect node_player1UI_sniperRifleIcon;
+	private Label node_player1UI_sniperRifleBulletCount;
+
+	private TextureRect node_player1UI_paintGlovesIcon;
+
+	private TextureRect node_player1UI_paintShoesIcon;
+
+	private TextureRect node_player1UI_bigBadBootiesIcon;
+
+	// END UI
+
 	#endregion // Nodes
 
 
@@ -34,6 +79,14 @@ public class MainSceneController : Node2D
 	[Export] private PackedScene m_sniperRifleBulletPackedScene;
 	[Export] private PackedScene m_grenadePackedScene;
 	[Export] private PackedScene m_lightMaskPackedScene;
+
+	[Export] private PackedScene m_playerJumpSound;
+	[Export] private PackedScene m_playerLandSound;
+
+	[Export] private PackedScene m_standardGunShootSound;
+	[Export] private PackedScene m_rifleShootSound;
+	[Export] private PackedScene m_machineGunShootSound;
+	[Export] private PackedScene m_sniperRifleShootSound;
 
 	private int m_tileWidth = 16;
 	private int m_tileHeight = 16;
@@ -58,6 +111,8 @@ public class MainSceneController : Node2D
 
 	public override void _EnterTree ()
 	{
+		node_oneShotSounds = GetNode<Node>("OneShotSounds");
+
 		node_tileMap = GetNode<TileMap>("TileMap");
 
 		node_player = GetNode<Player>("Player");
@@ -73,6 +128,34 @@ public class MainSceneController : Node2D
 		node_bulletDieParticles = GetNode<Node2D>("BulletDieParticles");
 		node_grenadeDieParticles = GetNode<Node2D>("GrenadeDieParticles");
 
+		// UI
+
+		node_player1UI_playerIcon = GetNode<TextureRect>("UI/Player1UI/PlayerIcon");
+
+		node_player1UI_powerGauge = GetNode<TextureProgress>("UI/Player1UI/PowerGaugeUI/PowerGaugeContainer/PowerGauge");
+
+		node_player1UI_grenadeUI = GetNode<Control>("UI/Player1UI/GrenadeUI");
+		node_player1UI_grenadeIcon = GetNode<TextureRect>("UI/Player1UI/GrenadeUI/GrenadeIcon");
+		node_player1UI_grenadeCount = GetNode<Label>("UI/Player1UI/GrenadeUI/GrenadeCountContainer/GrenadeCount");
+
+		node_player1UI_rifleUI = GetNode<Control>("UI/Player1UI/RifleUI");
+		node_player1UI_rifleIcon = GetNode<TextureRect>("UI/Player1UI/RifleUI/RifleIcon");
+		node_player1UI_rifleBulletCount = GetNode<Label>("UI/Player1UI/RifleUI/RifleBulletCountContainer/RifleBulletCount");
+
+		node_player1UI_machineGunUI = GetNode<Control>("UI/Player1UI/MachineGunUI");
+		node_player1UI_machineGunIcon = GetNode<TextureRect>("UI/Player1UI/MachineGunUI/MachineGunIcon");
+		node_player1UI_machineGunBulletCount = GetNode<Label>("UI/Player1UI/MachineGunUI/MachineGunBulletCountContainer/MachineGunBulletCount");
+
+		node_player1UI_sniperRifleUI = GetNode<Control>("UI/Player1UI/SniperRifleUI");
+		node_player1UI_sniperRifleIcon = GetNode<TextureRect>("UI/Player1UI/SniperRifleUI/SniperRifleIcon");
+		node_player1UI_sniperRifleBulletCount = GetNode<Label>("UI/Player1UI/SniperRifleUI/SniperRifleBulletCountContainer/SniperRifleBulletCount");
+
+		node_player1UI_paintGlovesIcon = GetNode<TextureRect>("UI/Player1UI/PaintGlovesUI/PaintGlovesIcon");
+		node_player1UI_paintShoesIcon = GetNode<TextureRect>("UI/Player1UI/PaintShoesUI/PaintShoesIcon");
+		node_player1UI_bigBadBootiesIcon = GetNode<TextureRect>("UI/Player1UI/BigBadBootiesUI/BigBadBootiesIcon");
+
+		// END UI
+
 		m_lightMasksArray = new LightMask[m_tileMapHeight, m_tileMapWidth];
 		m_lightMasksList = new List<LightMask>();
 
@@ -83,6 +166,8 @@ public class MainSceneController : Node2D
 	public override void _Ready ()
 	{
 		PopulateLightMasks();
+
+		node_player1UI_powerGauge.Value = node_player.PowerGaugeCurrent;
 	}
 
 	public override void _Input (InputEvent @event)
@@ -210,27 +295,34 @@ public class MainSceneController : Node2D
 	{
 		node_player.WasMoveLeftPressed = node_player.IsMoveLeftPressed;
 		node_player.WasMoveRightPressed = node_player.IsMoveRightPressed;
+		node_player.WasDownPressed = node_player.IsDownPressed;
 		node_player.WasJumpPressed = node_player.IsJumpPressed;
 		node_player.WasShootPressed = node_player.IsShootPressed;
 		node_player.WasThrowGrenadePressed = node_player.IsThrowGrenadePressed;
 
 		node_player.WasMoveLeftReleased = node_player.IsMoveLeftReleased;
 		node_player.WasMoveRightReleased = node_player.IsMoveRightReleased;
+		node_player.WasDownReleased = node_player.IsDownReleased;
 		node_player.WasJumpReleased = node_player.IsJumpReleased;
 		node_player.WasShootReleased = node_player.IsShootReleased;
 		node_player.WasThrowGrenadeReleased = node_player.IsThrowGrenadeReleased;
 
 		node_player.IsMoveLeftPressed = false;
 		node_player.IsMoveRightPressed = false;
+		node_player.IsDownPressed = false;
 		node_player.IsJumpPressed = false;
 		node_player.IsShootPressed = false;
 		node_player.IsThrowGrenadePressed = false;
 
 		node_player.IsMoveLeftReleased = false;
 		node_player.IsMoveRightReleased = false;
+		node_player.IsDownReleased = false;
 		node_player.IsJumpReleased = false;
 		node_player.IsShootReleased = false;
 		node_player.IsThrowGrenadeReleased = false;
+
+		node_player.WasOnGround = node_player.IsOnGround;
+		node_player.IsOnGround = false;
 
 		if (Input.IsActionPressed("PlayerMoveLeft"))
 		{
@@ -252,6 +344,18 @@ public class MainSceneController : Node2D
 			if (node_player.WasMoveRightPressed)
 			{
 				node_player.IsMoveRightReleased = true;
+			}
+		}
+
+		if (Input.IsActionPressed("PlayerDown"))
+		{
+			node_player.IsDownPressed = true;
+		}
+		else
+		{
+			if (node_player.WasDownPressed)
+			{
+				node_player.IsDownReleased = true;
 			}
 		}
 
@@ -323,7 +427,28 @@ public class MainSceneController : Node2D
 
 		playerVelocity.x = Mathf.Clamp(playerVelocity.x, -node_player.MaxMoveSpeed, node_player.MaxMoveSpeed);
 
-		playerVelocity.y += node_player.FallAcceleration * delta;
+		if (!node_player.IsDownPressed)
+		{
+			if (node_player.IsOnWall())
+			{
+				playerVelocity.y += node_player.WallSlideFallAcceleration * delta;
+			}
+			else
+			{
+				playerVelocity.y += node_player.FallAcceleration * delta;
+			}
+		}
+		else
+		{
+			if (node_player.IsOnWall())
+			{
+				playerVelocity.y += node_player.WallSlideFallAcceleration * 2f * delta;
+			}
+			else
+			{
+				playerVelocity.y += node_player.HoldDownFallAcceleration * delta;
+			}
+		}
 
 		if (node_player.IsJumpPressed && !node_player.WasJumpPressed)
 		{
@@ -339,6 +464,7 @@ public class MainSceneController : Node2D
 					playerVelocity.y += -Mathf.Sqrt(2 * node_player.JumpHeight * node_player.FallAcceleration);
 				}
 				node_player.IsJumping = true;
+				PlaySound(ESound.PlayerJump);
 			}
 		}
 		else if (!node_player.IsJumpPressed)
@@ -373,6 +499,21 @@ public class MainSceneController : Node2D
 		if (node_player.IsOnGround)
 		{
 			node_player.JumpCount = 0;
+			if (node_player.IsDownPressed && !node_player.WasDownPressed)
+			{
+				node_player.DisableOneWayPlatformCollision();
+				node_player.DisableOneWayCollisionTimer = 0f;
+			}
+		}
+
+		if (node_player.DisableOneWayCollisionTimer < node_player.DisableOneWayCollisionTime)
+		{
+			node_player.DisableOneWayCollisionTimer += delta;
+			if (node_player.DisableOneWayCollisionTimer >= node_player.DisableOneWayCollisionTime)
+			{
+				node_player.DisableOneWayCollisionTimer = node_player.DisableOneWayCollisionTime;
+				node_player.EnableOneWayPlatformCollision();
+			}
 		}
 
 		if (m_isUsingKeyboardAndMouse)
@@ -402,12 +543,12 @@ public class MainSceneController : Node2D
 		if (node_player.AimingDirection.x < 0)
 		{
 			node_player.FacingDirection = Player.EFacingDirection.Left;
-			node_player.node_sprite.FlipH = true;
+			node_player.node_animatedSprite.FlipH = true;
 		}
 		else if (node_player.AimingDirection.x > 0)
 		{
 			node_player.FacingDirection = Player.EFacingDirection.Right;
-			node_player.node_sprite.FlipH = false;
+			node_player.node_animatedSprite.FlipH = false;
 		}
 
 		if (node_player.HasPaintShoes && node_player.IsOnGround)
@@ -559,6 +700,33 @@ public class MainSceneController : Node2D
 				node_player.GrenadeThrowTimer = 0f;
 			}
 		}
+
+		if (node_player.IsOnGround)
+		{
+			if (node_player.Velocity.x != 0)
+			{
+				node_player.node_animatedSprite.Play("walk");
+			}
+			else
+			{
+				node_player.node_animatedSprite.Play("idle");
+			}
+		}
+		else
+		{
+			node_player.node_animatedSprite.Play("jump");
+		}
+
+		if (!node_player.WasOnGround && node_player.IsOnGround)
+		{
+			PlaySound(ESound.PlayerLand);
+		}
+
+		node_player1UI_powerGauge.Value = node_player.PowerGaugeCurrent;
+		node_player1UI_grenadeCount.Text = node_player.NumberOfGrenades.ToString();
+		node_player1UI_rifleBulletCount.Text = node_player.RifleBullets.ToString();
+		node_player1UI_machineGunBulletCount.Text = node_player.MachineGunBullets.ToString();
+		node_player1UI_sniperRifleBulletCount.Text = node_player.SniperRifleBullets.ToString();
 	}
 
 	private void TickBullets (float delta)
@@ -670,18 +838,23 @@ public class MainSceneController : Node2D
 		{
 			case Player.EBulletType.Standard:
 				bullet = m_standardBulletPackedScene.Instance<Bullet>();
+				PlaySound(ESound.StandardGunShoot);
 				break;
 			case Player.EBulletType.Rifle:
 				bullet = m_rifleBulletPackedScene.Instance<Bullet>();
+				PlaySound(ESound.RifleShoot);
 				break;
 			case Player.EBulletType.MachineGun:
 				bullet = m_machineGunBulletPackedScene.Instance<Bullet>();
+				PlaySound(ESound.MachineGunShoot);
 				break;
 			case Player.EBulletType.SniperRifle:
 				bullet = m_sniperRifleBulletPackedScene.Instance<Bullet>();
+				PlaySound(ESound.SniperRifleShoot);
 				break;
 			default:
 				bullet = m_standardBulletPackedScene.Instance<Bullet>();
+				PlaySound(ESound.StandardGunShoot);
 				break;
 		}
 
@@ -736,6 +909,40 @@ public class MainSceneController : Node2D
 				}
 			}
 		}
+	}
+
+	private void PlaySound (ESound sound)
+	{
+		OneShotSound oneShotSound;
+
+		switch (sound)
+		{
+			case ESound.PlayerJump:
+				oneShotSound = m_playerJumpSound.Instance<OneShotSound>();
+				break;
+			case ESound.PlayerLand:
+				oneShotSound = m_playerLandSound.Instance<OneShotSound>();
+				break;
+
+			case ESound.StandardGunShoot:
+				oneShotSound = m_standardGunShootSound.Instance<OneShotSound>();
+				break;
+			case ESound.RifleShoot:
+				oneShotSound = m_rifleShootSound.Instance<OneShotSound>();
+				break;
+			case ESound.MachineGunShoot:
+				oneShotSound = m_machineGunShootSound.Instance<OneShotSound>();
+				break;
+			case ESound.SniperRifleShoot:
+				oneShotSound = m_sniperRifleShootSound.Instance<OneShotSound>();
+				break;
+
+			default:
+				oneShotSound = m_playerJumpSound.Instance<OneShotSound>();
+				break;
+		}
+
+		node_oneShotSounds.AddChild(oneShotSound);
 	}
 
 	#endregion // Private methods

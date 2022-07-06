@@ -1,6 +1,6 @@
 [gd_resource type="TileSet" load_steps=23 format=2]
 
-[ext_resource path="res://sprites/spritesheet_0001.png" type="Texture" id=2]
+[ext_resource path="res://sprites/spritesheets/spritesheet_0001.png" type="Texture" id=2]
 
 [sub_resource type="ConvexPolygonShape2D" id=8]
 points = PoolVector2Array( 16, 16, 0, 16, 0, 0, 16, 0 )

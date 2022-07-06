@@ -1,0 +1,15 @@
+[remap]
+
+importer="ogg_vorbis"
+type="AudioStreamOGGVorbis"
+path="res://.import/GrahTitle.ogg-045c849529ad6e104d9dc3ee50aa675f.oggstr"
+
+[deps]
+
+source_file="res://audio/sounds/GrahTitle.ogg"
+dest_files=[ "res://.import/GrahTitle.ogg-045c849529ad6e104d9dc3ee50aa675f.oggstr" ]
+
+[params]
+
+loop=false
+loop_offset=0

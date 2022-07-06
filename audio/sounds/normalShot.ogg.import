@@ -1,0 +1,15 @@
+[remap]
+
+importer="ogg_vorbis"
+type="AudioStreamOGGVorbis"
+path="res://.import/normalShot.ogg-ff7d908d9b780c86466983e26636f471.oggstr"
+
+[deps]
+
+source_file="res://audio/sounds/normalShot.ogg"
+dest_files=[ "res://.import/normalShot.ogg-ff7d908d9b780c86466983e26636f471.oggstr" ]
+
+[params]
+
+loop=false
+loop_offset=0

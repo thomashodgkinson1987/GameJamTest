@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=2]
 
-[ext_resource path="res://sprites/atlastexture_0001.tres" type="Texture" id=1]
+[ext_resource path="res://resources/spriteframes/players/player1/spriteframes_0001.tres" type="SpriteFrames" id=1]
 [ext_resource path="res://scripts/Player.cs" type="Script" id=2]
 
 [sub_resource type="Curve" id=2]
@@ -10,13 +10,13 @@ _data = [ Vector2( 0, 0 ), 0.0, 1.0, 0, 1, Vector2( 1, 1 ), 1.0, 0.0, 1, 0 ]
 extents = Vector2( 4, 7 )
 
 [node name="Player" type="KinematicBody2D"]
-collision_mask = 2
+collision_mask = 18
 script = ExtResource( 2 )
 PaintColor = 1
 
-[node name="Sprite" type="Sprite" parent="."]
+[node name="AnimatedSprite" type="AnimatedSprite" parent="."]
 position = Vector2( 0, -8 )
-texture = ExtResource( 1 )
+frames = ExtResource( 1 )
 __meta__ = {
 "_edit_lock_": true
 }

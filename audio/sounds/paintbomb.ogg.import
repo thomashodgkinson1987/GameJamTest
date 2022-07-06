@@ -1,0 +1,15 @@
+[remap]
+
+importer="ogg_vorbis"
+type="AudioStreamOGGVorbis"
+path="res://.import/paintbomb.ogg-8c10e4a794b835ba6b494cbe143eb571.oggstr"
+
+[deps]
+
+source_file="res://audio/sounds/paintbomb.ogg"
+dest_files=[ "res://.import/paintbomb.ogg-8c10e4a794b835ba6b494cbe143eb571.oggstr" ]
+
+[params]
+
+loop=false
+loop_offset=0
