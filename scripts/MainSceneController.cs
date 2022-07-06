@@ -36,13 +36,16 @@ public class MainSceneController : Node2D
 	private int m_tileHeight = 16;
 
 	private int m_tileMapWidth = 32;
-	private int m_tileMapHeight = 32 - 5;
+	private int m_tileMapHeight = 27;
 
 	private LightMask[,] m_lightMasksArray;
 	private List<LightMask> m_lightMasksList;
 
 	private List<Bullet> m_bulletsList;
 	private List<Grenade> m_grenadesList;
+
+	[Export] private bool m_isUsingKeyboardAndMouse = true;
+	[Export] private bool m_isUsingController = false;
 
 	#endregion // Fields
 
@@ -81,7 +84,16 @@ public class MainSceneController : Node2D
 
 	public override void _Input (InputEvent @event)
 	{
-
+		if (@event is InputEventKey)
+		{
+			m_isUsingKeyboardAndMouse = true;
+			m_isUsingController = false;
+		}
+		else if (@event is InputEventJoypadButton || @event is InputEventJoypadMotion)
+		{
+			m_isUsingKeyboardAndMouse = false;
+			m_isUsingController = true;
+		}
 	}
 
 	public override void _PhysicsProcess (float delta)
@@ -135,16 +147,19 @@ public class MainSceneController : Node2D
 		{
 			for (int x = 0; x < m_tileMapWidth; x++)
 			{
-				LightMask lightMask = m_lightMaskPackedScene.Instance<LightMask>();
-				node_lightMasks.AddChild(lightMask);
-				Vector2 position = Vector2.Zero;
-				position.x = (x * m_tileWidth) + (m_tileWidth / 2f);
-				position.y = (y * m_tileHeight) + (m_tileHeight / 2f);
-				lightMask.Position = position;
-				lightMask.Color = new Color(1, 1, 1, 1);
+				if (node_tileMap.GetCell(x, y) != -1)
+				{
+					LightMask lightMask = m_lightMaskPackedScene.Instance<LightMask>();
+					node_lightMasks.AddChild(lightMask);
+					Vector2 position = Vector2.Zero;
+					position.x = (x * m_tileWidth) + (m_tileWidth / 2f);
+					position.y = (y * m_tileHeight) + (m_tileHeight / 2f);
+					lightMask.Position = position;
+					lightMask.Color = new Color(1, 1, 1, 1);
 
-				m_lightMasksArray[y, x] = lightMask;
-				m_lightMasksList.Add(lightMask);
+					m_lightMasksArray[y, x] = lightMask;
+					m_lightMasksList.Add(lightMask);
+				}
 			}
 		}
 	}
@@ -158,6 +173,17 @@ public class MainSceneController : Node2D
 	public void SetLightMaskColor (int x, int y, Color color)
 	{
 		m_lightMasksArray[y, x].Color = color;
+	}
+
+	public void SetLightMaskColor (LightMask lightMask, EPaintColor paintColor)
+	{
+		Color color = PaintColors.GetColorFromPaintColor(paintColor);
+		SetLightMaskColor(lightMask, color);
+	}
+
+	public void SetLightMaskColor (LightMask lightMask, Color color)
+	{
+		lightMask.Color = color;
 	}
 
 	private void TickPlayer (float delta)
@@ -329,18 +355,34 @@ public class MainSceneController : Node2D
 			node_player.JumpCount = 0;
 		}
 
-		if (node_player.Velocity.x < 0)
+		if (m_isUsingKeyboardAndMouse)
+		{
+			Vector2 mousePosition = GetGlobalMousePosition();
+			Vector2 diff = mousePosition - node_player.node_projectileSpawnPosition.GlobalPosition;
+			diff = diff.Normalized();
+			node_player.AimingDirection = diff;
+		}
+		else if (m_isUsingController)
+		{
+			Vector2 rightAxisDirection = GetGlobalMousePosition();
+			Vector2 target = node_player.node_projectileSpawnPosition.GlobalPosition + rightAxisDirection;
+			Vector2 diff = target - node_player.node_projectileSpawnPosition.GlobalPosition;
+			diff = diff.Normalized();
+			node_player.AimingDirection = diff;
+		}
+
+		if (node_player.AimingDirection.x < 0)
 		{
 			node_player.FacingDirection = Player.EFacingDirection.Left;
 			node_player.node_sprite.FlipH = true;
 		}
-		else if (node_player.Velocity.x > 0)
+		else if (node_player.AimingDirection.x > 0)
 		{
 			node_player.FacingDirection = Player.EFacingDirection.Right;
 			node_player.node_sprite.FlipH = false;
 		}
 
-		if (node_player.IsOnGround)
+		if (node_player.HasPaintShoes && node_player.IsOnGround)
 		{
 			float x = node_player.Position.x;
 			float y = node_player.Position.y;
@@ -363,18 +405,7 @@ public class MainSceneController : Node2D
 		if (node_player.IsShootPressed && !node_player.WasShootPressed)
 		{
 			Vector2 position = node_player.node_projectileSpawnPosition.GlobalPosition;
-			Vector2 velocity = Vector2.Zero;
-
-			if (node_player.FacingDirection == Player.EFacingDirection.Left)
-			{
-				velocity.x = -1;
-			}
-			else if (node_player.FacingDirection == Player.EFacingDirection.Right)
-			{
-				velocity.x = 1;
-			}
-
-			velocity.x *= 128f;
+			Vector2 velocity = node_player.AimingDirection * 128f;
 
 			EPaintColor paintColor = node_player.PaintColor;
 			SpawnBullet(position, velocity, paintColor);
@@ -406,27 +437,13 @@ public class MainSceneController : Node2D
 				Vector2 position = node_player.node_projectileSpawnPosition.GlobalPosition;
 				Vector2 velocity = Vector2.Zero;
 
-				if (node_player.FacingDirection == Player.EFacingDirection.Left)
-				{
-					velocity.x = -1;
-				}
-				else if (node_player.FacingDirection == Player.EFacingDirection.Right)
-				{
-					velocity.x = 1;
-				}
-
-				float minStrengthX = 64f;
-				float maxStrengthX = 256f;
-				float minStrengthY = -64f;
-				float maxStrengthY = -256f;
-
 				float per = node_player.GrenadeThrowTimer / node_player.GrenadeThrowTimeLimit;
 
-				float strengthX = Mathf.Lerp(minStrengthX, maxStrengthX, per);
-				float strengthY = Mathf.Lerp(minStrengthY, maxStrengthY, per);
+				float minStrength = 64f;
+				float maxStrength = 512f;
+				float strength = Mathf.Lerp(minStrength, maxStrength, per);
 
-				velocity.x *= strengthX;
-				velocity.y = strengthY;
+				velocity = node_player.AimingDirection * strength;
 
 				EPaintColor paintColor = node_player.PaintColor;
 				SpawnGrenade(position, velocity, paintColor);
@@ -446,10 +463,22 @@ public class MainSceneController : Node2D
 
 			if (bullet.LifetimeTimer < bullet.Lifetime)
 			{
-				bullet.Velocity = bullet.MoveAndSlide(bullet.Velocity, Vector2.Up);
+				KinematicCollision2D collision = bullet.MoveAndCollide(bullet.Velocity * delta);
+
+				if (collision != null)
+				{
+					CauseExplosion(collision.Position, bullet.ExplosionRadius, bullet.PaintColor);
+
+					bullet.QueueFree();
+					node_bullets.RemoveChild(bullet);
+					m_bulletsList.RemoveAt(i);
+					i--;
+				}
 			}
 			else
 			{
+				CauseExplosion(bullet.Position, bullet.ExplosionRadius, bullet.PaintColor);
+
 				bullet.QueueFree();
 				node_bullets.RemoveChild(bullet);
 				m_bulletsList.RemoveAt(i);
@@ -512,6 +541,8 @@ public class MainSceneController : Node2D
 			}
 			else
 			{
+				CauseExplosion(grenade.Position, grenade.ExplosionRadius, grenade.PaintColor);
+
 				grenade.QueueFree();
 				node_grenades.RemoveChild(grenade);
 				m_grenadesList.RemoveAt(i);
@@ -546,31 +577,41 @@ public class MainSceneController : Node2D
 		return grenade;
 	}
 
-	#endregion // Private methods
-
-
-
-	#region Callback methods
-
-	private void OnBodyEnteredLightMaskArea (KinematicBody2D body)
+	private void CauseExplosion (Vector2 position, float radius, EPaintColor paintColor)
 	{
-		if (body is Projectile projectile)
-		{
+		Physics2DDirectSpaceState state = GetWorld2d().DirectSpaceState;
 
-		}
-	}
+		Physics2DShapeQueryParameters foo = new Physics2DShapeQueryParameters();
+		CircleShape2D shape = new CircleShape2D();
+		shape.Radius = radius;
+		foo.SetShape(shape);
+		foo.Transform = new Transform2D(0f, position);
+		foo.CollisionLayer = 0 | (1 << 3);
+		foo.CollideWithAreas = true;
+		foo.CollideWithBodies = false;
 
-	private void OnAreaEnteredProjectileArea (Area2D area)
-	{
-		if (area.GetParent() != null)
+		Godot.Collections.Array results = state.IntersectShape(foo, 256);
+
+		GD.Print(results.Count);
+
+		for (int i = 0; i < results.Count; i++)
 		{
-			if (area.GetParent() is LightMask lightMask)
+			object result = results[i];
+			Godot.Collections.Dictionary dict = (Godot.Collections.Dictionary)result;
+
+			if (dict.Contains("collider") && dict["collider"] is Area2D area)
 			{
-
+				if (area.GetParent() != null)
+				{
+					if (area.GetParent() is LightMask lightMask)
+					{
+						SetLightMaskColor(lightMask, paintColor);
+					}
+				}
 			}
 		}
 	}
 
-	#endregion // Callback methods
+	#endregion // Private methods
 
 }

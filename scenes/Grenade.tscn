@@ -10,6 +10,8 @@ radius = 4.0
 collision_layer = 4
 collision_mask = 10
 script = ExtResource( 2 )
+Lifetime = 2.0
+ExplosionRadius = 64.0
 
 [node name="Sprite" type="Sprite" parent="."]
 texture = ExtResource( 1 )

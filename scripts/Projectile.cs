@@ -39,6 +39,14 @@ public class Projectile : KinematicBody2D
 
 	[Export] public Vector2 Velocity { get; set; } = new Vector2(64f, 0f);
 
+	private float _explosionRadius = 8f;
+	[Export]
+	public float ExplosionRadius
+	{
+		get => _explosionRadius;
+		set => _explosionRadius = Mathf.Max(1, value);
+	}
+
 	#endregion // Properties
 
 

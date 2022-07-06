@@ -43,6 +43,8 @@ public class Player : KinematicBody2D
 
 	public EFacingDirection FacingDirection { get; set; } = EFacingDirection.Right;
 
+	public Vector2 AimingDirection { get; set; } = Vector2.Zero;
+
 	public bool IsOnGround { get; set; } = false;
 	public bool IsJumping { get; set; } = false;
 	public bool IsFalling { get; set; } = false;
