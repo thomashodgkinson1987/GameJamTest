@@ -852,16 +852,25 @@ public class MainSceneController : Node2D
 				{
 					Vector2 normal = collision.Normal;
 
-					if (normal.x != 0)
-					{
-						velocity.x /= 2f;
-						velocity.x *= -1;
-					}
 					if (normal.y != 0)
 					{
 						velocity.x /= 2f;
 						velocity.y /= 2f;
 						velocity.y *= -1;
+						if (normal.x != 0)
+						{
+							velocity.x *= -1;
+						}
+					}
+					else if (normal.x != 0)
+					{
+						velocity.x /= 2f;
+						velocity.x *= -1;
+						if (normal.y != 0)
+						{
+							velocity.y /= 2f;
+							velocity.y *= -1;
+						}
 					}
 				}
 

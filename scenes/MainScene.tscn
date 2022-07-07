@@ -75,6 +75,7 @@ m_sniperRifleShootOneShotSoundPackedScene = ExtResource( 24 )
 [node name="OneShotSounds" type="Node" parent="."]
 
 [node name="TileMap" type="TileMap" parent="."]
+light_mask = 2
 tile_set = ExtResource( 1 )
 cell_size = Vector2( 16, 16 )
 collision_layer = 2
