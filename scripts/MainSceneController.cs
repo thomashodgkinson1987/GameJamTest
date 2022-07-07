@@ -37,7 +37,7 @@ public class MainSceneController : Node2D
 	private Node2D node_bulletDieParticles;
 	private Node2D node_grenadeDieParticles;
 
-	// UI
+	// Player 1 UI
 
 	private Control node_player1UI;
 
@@ -69,6 +69,18 @@ public class MainSceneController : Node2D
 
 	private Control node_player1UI_bigBadBootiesUI;
 	private TextureRect node_player1UI_bigBadBootiesIcon;
+
+	// Level data UI
+
+	private Control node_levelDataUI;
+
+	private Label node_levelDataUI_whiteTileCountLabel;
+	private Label node_levelDataUI_redTileCountLabel;
+	private Label node_levelDataUI_yellowTileCountLabel;
+	private Label node_levelDataUI_greenTileCountLabel;
+	private Label node_levelDataUI_aquaTileCountLabel;
+	private Label node_levelDataUI_blueTileCountLabel;
+	private Label node_levelDataUI_fuchsiaTileCountLabel;
 
 	#endregion // Nodes
 
@@ -107,6 +119,14 @@ public class MainSceneController : Node2D
 	[Export] private bool m_isUsingKeyboardAndMouse = true;
 	[Export] private bool m_isUsingController = false;
 
+	private int m_whiteTileCount;
+	private int m_redTileCount;
+	private int m_yellowTileCount;
+	private int m_greenTileCount;
+	private int m_aquaTileCount;
+	private int m_blueTileCount;
+	private int m_fuchsiaTileCount;
+
 	#endregion // Fields
 
 
@@ -132,7 +152,7 @@ public class MainSceneController : Node2D
 		node_bulletDieParticles = GetNode<Node2D>("BulletDieParticles");
 		node_grenadeDieParticles = GetNode<Node2D>("GrenadeDieParticles");
 
-		// UI
+		// Player 1 UI
 
 		node_player1UI = GetNode<Control>("UI/Player1UI");
 
@@ -164,6 +184,18 @@ public class MainSceneController : Node2D
 
 		node_player1UI_bigBadBootiesUI = GetNode<Control>("UI/Player1UI/BigBadBootiesUI");
 		node_player1UI_bigBadBootiesIcon = GetNode<TextureRect>("UI/Player1UI/BigBadBootiesUI/BigBadBootiesIcon");
+
+		// Level data UI
+
+		node_levelDataUI = GetNode<Control>("UI/LevelDataUI");
+
+		node_levelDataUI_whiteTileCountLabel = GetNode<Label>("UI/LevelDataUI/WhiteTileDataUI/TileCount");
+		node_levelDataUI_redTileCountLabel = GetNode<Label>("UI/LevelDataUI/RedTileDataUI/TileCount");
+		node_levelDataUI_yellowTileCountLabel = GetNode<Label>("UI/LevelDataUI/YellowTileDataUI/TileCount");
+		node_levelDataUI_greenTileCountLabel = GetNode<Label>("UI/LevelDataUI/GreenTileDataUI/TileCount");
+		node_levelDataUI_aquaTileCountLabel = GetNode<Label>("UI/LevelDataUI/AquaTileDataUI/TileCount");
+		node_levelDataUI_blueTileCountLabel = GetNode<Label>("UI/LevelDataUI/BlueTileDataUI/TileCount");
+		node_levelDataUI_fuchsiaTileCountLabel = GetNode<Label>("UI/LevelDataUI/FuchsiaTileDataUI/TileCount");
 	}
 
 	public override void _Ready ()
@@ -272,12 +304,20 @@ public class MainSceneController : Node2D
 
 					m_lightMasksArray[y, x] = lightMask;
 					m_lightMasksList.Add(lightMask);
+
+					m_whiteTileCount++;
 				}
 			}
 		}
 	}
 
 	private void UpdateUI ()
+	{
+		UpdatePlayer1UI();
+		UpdateLevelDataUI();
+	}
+
+	private void UpdatePlayer1UI ()
 	{
 		node_player1UI_playerIcon.SelfModulate = PaintColors.GetColorFromPaintColor(node_player.PaintColor);
 
@@ -307,6 +347,17 @@ public class MainSceneController : Node2D
 
 		node_player1UI_bigBadBootiesUI.Visible = node_player.HasBigBadBooties;
 		node_player1UI_bigBadBootiesIcon.SelfModulate = PaintColors.GetColorFromPaintColor(node_player.BigBadBootiesPaintColor);
+	}
+
+	private void UpdateLevelDataUI ()
+	{
+		node_levelDataUI_whiteTileCountLabel.Text = m_whiteTileCount.ToString();
+		node_levelDataUI_redTileCountLabel.Text = m_redTileCount.ToString();
+		node_levelDataUI_yellowTileCountLabel.Text = m_yellowTileCount.ToString();
+		node_levelDataUI_greenTileCountLabel.Text = m_greenTileCount.ToString();
+		node_levelDataUI_aquaTileCountLabel.Text = m_aquaTileCount.ToString();
+		node_levelDataUI_blueTileCountLabel.Text = m_blueTileCount.ToString();
+		node_levelDataUI_fuchsiaTileCountLabel.Text = m_fuchsiaTileCount.ToString();
 	}
 
 	private void SetLightMaskColor (int x, int y, EPaintColor paintColor)
@@ -496,7 +547,43 @@ public class MainSceneController : Node2D
 						int tileY = Mathf.FloorToInt(y / m_tileHeight) + 1;
 						if (node_tileMap.GetCell(tileX, tileY) != -1)
 						{
-							SetLightMaskColor(tileX, tileY, node_player.PaintColor);
+							Color oldColor = m_lightMasksArray[tileY, tileX].Color;
+							Color newColor = PaintColors.GetColorFromPaintColor(node_player.PaintShoesPaintColor);
+
+							if (oldColor != newColor)
+							{
+								if (oldColor == Colors.White)
+									m_whiteTileCount--;
+								else if (oldColor == Colors.Red)
+									m_redTileCount--;
+								else if (oldColor == Colors.Yellow)
+									m_yellowTileCount--;
+								else if (oldColor == Colors.Green)
+									m_greenTileCount--;
+								else if (oldColor == Colors.Aqua)
+									m_aquaTileCount--;
+								else if (oldColor == Colors.Blue)
+									m_blueTileCount--;
+								else if (oldColor == Colors.Fuchsia)
+									m_fuchsiaTileCount--;
+
+								if (newColor == Colors.White)
+									m_whiteTileCount++;
+								else if (newColor == Colors.Red)
+									m_redTileCount++;
+								else if (newColor == Colors.Yellow)
+									m_yellowTileCount++;
+								else if (newColor == Colors.Green)
+									m_greenTileCount++;
+								else if (newColor == Colors.Aqua)
+									m_aquaTileCount++;
+								else if (newColor == Colors.Blue)
+									m_blueTileCount++;
+								else if (newColor == Colors.Fuchsia)
+									m_fuchsiaTileCount++;
+
+								SetLightMaskColor(tileX, tileY, node_player.PaintShoesPaintColor);
+							}
 						}
 					}
 				}
@@ -635,6 +722,10 @@ public class MainSceneController : Node2D
 						if (!node_player.IsInfiniteMachineGunAmmunition)
 						{
 							node_player.MachineGunBulletsCount--;
+							if (node_player.MachineGunBulletsCount == 0)
+							{
+								node_player.GunEquipSlot = Player.EGunEquipSlot.None;
+							}
 						}
 						Vector2 position = node_player.node_projectileSpawnPosition.GlobalPosition;
 						Vector2 direction = node_player.AimingDirection;
@@ -880,7 +971,55 @@ public class MainSceneController : Node2D
 			{
 				if (area.GetParent() != null && area.GetParent() is LightMask lightMask)
 				{
-					SetLightMaskColor(lightMask, paintColor);
+					Color newColor = PaintColors.GetColorFromPaintColor(paintColor);
+					Color oldColor = lightMask.Color;
+
+					if (oldColor != newColor)
+					{
+						switch (paintColor)
+						{
+							case EPaintColor.White:
+								m_whiteTileCount++;
+								break;
+							case EPaintColor.Red:
+								m_redTileCount++;
+								break;
+							case EPaintColor.Yellow:
+								m_yellowTileCount++;
+								break;
+							case EPaintColor.Green:
+								m_greenTileCount++;
+								break;
+							case EPaintColor.Aqua:
+								m_aquaTileCount++;
+								break;
+							case EPaintColor.Blue:
+								m_blueTileCount++;
+								break;
+							case EPaintColor.Fuchsia:
+								m_fuchsiaTileCount++;
+								break;
+							default:
+								break;
+						}
+
+						if (oldColor == Colors.White)
+							m_whiteTileCount--;
+						else if (oldColor == Colors.Red)
+							m_redTileCount--;
+						else if (oldColor == Colors.Yellow)
+							m_yellowTileCount--;
+						else if (oldColor == Colors.Green)
+							m_greenTileCount--;
+						else if (oldColor == Colors.Aqua)
+							m_aquaTileCount--;
+						else if (oldColor == Colors.Blue)
+							m_blueTileCount--;
+						else if (oldColor == Colors.Fuchsia)
+							m_fuchsiaTileCount--;
+
+						SetLightMaskColor(lightMask, paintColor);
+					}
 				}
 			}
 		}

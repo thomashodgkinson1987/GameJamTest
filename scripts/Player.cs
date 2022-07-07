@@ -116,7 +116,7 @@ public class Player : KinematicBody2D
 
 	[Export] public float PowerGaugeLimit { get; set; } = 100f;
 	[Export] public float PowerGaugeCurrent { get; set; } = 100f;
-	[Export] public float PowerGaugeRechargeRate { get; set; } = 0.5f;
+	[Export] public float PowerGaugeRechargeRate { get; set; } = 0.25f;
 
 	[Export] public float StandardBulletPowerCost { get; set; } = 10f;
 

@@ -73,19 +73,19 @@ public class PickUp : Area2D
 				case EPickUpType.None:
 					break;
 				case EPickUpType.Grenade:
-					player.GrenadesCount += 1;
+					player.GrenadesCount = Mathf.Clamp(player.GrenadesCount + 1, 0, 99);
 					break;
 				case EPickUpType.Rifle:
 					player.GunEquipSlot = Player.EGunEquipSlot.Rifle;
-					player.RifleBulletsCount += 16;
+					player.RifleBulletsCount = Mathf.Clamp(player.RifleBulletsCount + 16, 0, 99);
 					break;
 				case EPickUpType.MachineGun:
 					player.GunEquipSlot = Player.EGunEquipSlot.MachineGun;
-					player.MachineGunBulletsCount += 16;
+					player.MachineGunBulletsCount = Mathf.Clamp(player.MachineGunBulletsCount + 16, 0, 99);
 					break;
 				case EPickUpType.SniperRifle:
 					player.GunEquipSlot = Player.EGunEquipSlot.SniperRifle;
-					player.SniperRifleBulletsCount += 16;
+					player.SniperRifleBulletsCount = Mathf.Clamp(player.SniperRifleBulletsCount + 16, 0, 99);
 					break;
 				case EPickUpType.PaintGloves:
 					player.HasPaintGloves = true;

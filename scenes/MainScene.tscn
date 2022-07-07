@@ -1,4 +1,4 @@
-[gd_scene load_steps=36 format=2]
+[gd_scene load_steps=39 format=2]
 
 [ext_resource path="res://resources/tilesets/tileset_0001.tres" type="TileSet" id=1]
 [ext_resource path="res://scripts/MainSceneController.cs" type="Script" id=2]
@@ -33,6 +33,7 @@
 [ext_resource path="res://scenes/PickUps/PickUp_PaintShoes.tscn" type="PackedScene" id=31]
 [ext_resource path="res://scenes/PickUps/PickUp_BigBadBooties.tscn" type="PackedScene" id=32]
 [ext_resource path="res://scenes/PickUps/PickUp_Grenade.tscn" type="PackedScene" id=33]
+[ext_resource path="res://sprites/ui/tiles/atlastexture_tile0001.tres" type="Texture" id=34]
 
 [sub_resource type="DynamicFontData" id=1]
 antialiased = false
@@ -42,6 +43,15 @@ font_path = "res://fonts/AGoblinAppears-o2aV.ttf"
 [sub_resource type="DynamicFont" id=2]
 size = 7
 font_data = SubResource( 1 )
+
+[sub_resource type="DynamicFontData" id=3]
+antialiased = false
+hinting = 0
+font_path = "res://fonts/AGoblinAppears-o2aV.ttf"
+
+[sub_resource type="DynamicFont" id=4]
+size = 9
+font_data = SubResource( 3 )
 
 [node name="MainScene" type="Node2D"]
 script = ExtResource( 2 )
@@ -418,3 +428,151 @@ margin_right = 16.0
 margin_bottom = 16.0
 texture = ExtResource( 17 )
 expand = true
+
+[node name="LevelDataUI" type="Control" parent="UI"]
+margin_left = 328.0
+margin_top = 440.0
+margin_right = 504.0
+margin_bottom = 504.0
+
+[node name="WhiteTileDataUI" type="Control" parent="UI/LevelDataUI"]
+margin_right = 48.0
+margin_bottom = 16.0
+
+[node name="TileTextureRect" type="TextureRect" parent="UI/LevelDataUI/WhiteTileDataUI"]
+margin_right = 16.0
+margin_bottom = 16.0
+texture = ExtResource( 34 )
+
+[node name="TileCount" type="Label" parent="UI/LevelDataUI/WhiteTileDataUI"]
+margin_left = 16.0
+margin_right = 48.0
+margin_bottom = 16.0
+custom_fonts/font = SubResource( 4 )
+text = "999"
+align = 2
+valign = 1
+
+[node name="RedTileDataUI" type="Control" parent="UI/LevelDataUI"]
+margin_left = 64.0
+margin_right = 112.0
+margin_bottom = 16.0
+
+[node name="TileTextureRect" type="TextureRect" parent="UI/LevelDataUI/RedTileDataUI"]
+self_modulate = Color( 1, 0, 0, 1 )
+margin_right = 16.0
+margin_bottom = 16.0
+texture = ExtResource( 34 )
+
+[node name="TileCount" type="Label" parent="UI/LevelDataUI/RedTileDataUI"]
+margin_left = 16.0
+margin_right = 48.0
+margin_bottom = 16.0
+custom_fonts/font = SubResource( 4 )
+text = "999"
+align = 2
+valign = 1
+
+[node name="YellowTileDataUI" type="Control" parent="UI/LevelDataUI"]
+margin_left = 64.0
+margin_top = 24.0
+margin_right = 112.0
+margin_bottom = 40.0
+
+[node name="TileTextureRect" type="TextureRect" parent="UI/LevelDataUI/YellowTileDataUI"]
+self_modulate = Color( 1, 1, 0, 1 )
+margin_right = 16.0
+margin_bottom = 16.0
+texture = ExtResource( 34 )
+
+[node name="TileCount" type="Label" parent="UI/LevelDataUI/YellowTileDataUI"]
+margin_left = 16.0
+margin_right = 48.0
+margin_bottom = 16.0
+custom_fonts/font = SubResource( 4 )
+text = "999"
+align = 2
+valign = 1
+
+[node name="GreenTileDataUI" type="Control" parent="UI/LevelDataUI"]
+margin_left = 64.0
+margin_top = 48.0
+margin_right = 112.0
+margin_bottom = 64.0
+
+[node name="TileTextureRect" type="TextureRect" parent="UI/LevelDataUI/GreenTileDataUI"]
+self_modulate = Color( 0, 1, 0, 1 )
+margin_right = 16.0
+margin_bottom = 16.0
+texture = ExtResource( 34 )
+
+[node name="TileCount" type="Label" parent="UI/LevelDataUI/GreenTileDataUI"]
+margin_left = 16.0
+margin_right = 48.0
+margin_bottom = 16.0
+custom_fonts/font = SubResource( 4 )
+text = "999"
+align = 2
+valign = 1
+
+[node name="AquaTileDataUI" type="Control" parent="UI/LevelDataUI"]
+margin_left = 128.0
+margin_right = 176.0
+margin_bottom = 16.0
+
+[node name="TileTextureRect" type="TextureRect" parent="UI/LevelDataUI/AquaTileDataUI"]
+self_modulate = Color( 0, 1, 1, 1 )
+margin_right = 16.0
+margin_bottom = 16.0
+texture = ExtResource( 34 )
+
+[node name="TileCount" type="Label" parent="UI/LevelDataUI/AquaTileDataUI"]
+margin_left = 16.0
+margin_right = 48.0
+margin_bottom = 16.0
+custom_fonts/font = SubResource( 4 )
+text = "999"
+align = 2
+valign = 1
+
+[node name="BlueTileDataUI" type="Control" parent="UI/LevelDataUI"]
+margin_left = 128.0
+margin_top = 24.0
+margin_right = 176.0
+margin_bottom = 40.0
+
+[node name="TileTextureRect" type="TextureRect" parent="UI/LevelDataUI/BlueTileDataUI"]
+self_modulate = Color( 0, 0, 1, 1 )
+margin_right = 16.0
+margin_bottom = 16.0
+texture = ExtResource( 34 )
+
+[node name="TileCount" type="Label" parent="UI/LevelDataUI/BlueTileDataUI"]
+margin_left = 16.0
+margin_right = 48.0
+margin_bottom = 16.0
+custom_fonts/font = SubResource( 4 )
+text = "999"
+align = 2
+valign = 1
+
+[node name="FuchsiaTileDataUI" type="Control" parent="UI/LevelDataUI"]
+margin_left = 128.0
+margin_top = 48.0
+margin_right = 176.0
+margin_bottom = 64.0
+
+[node name="TileTextureRect" type="TextureRect" parent="UI/LevelDataUI/FuchsiaTileDataUI"]
+self_modulate = Color( 1, 0, 1, 1 )
+margin_right = 16.0
+margin_bottom = 16.0
+texture = ExtResource( 34 )
+
+[node name="TileCount" type="Label" parent="UI/LevelDataUI/FuchsiaTileDataUI"]
+margin_left = 16.0
+margin_right = 48.0
+margin_bottom = 16.0
+custom_fonts/font = SubResource( 4 )
+text = "999"
+align = 2
+valign = 1
