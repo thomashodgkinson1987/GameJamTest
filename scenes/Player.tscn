@@ -12,6 +12,12 @@ extents = Vector2( 4, 5.5 )
 [node name="Player" type="KinematicBody2D"]
 collision_mask = 50
 script = ExtResource( 2 )
+IsInfiniteJumps = true
+IsInfinitePowerGauge = true
+IsInfiniteGrenades = true
+IsInfiniteRifleAmmunition = true
+IsInfiniteMachineGunAmmunition = true
+IsInfiniteSniperRifleAmmunition = true
 
 [node name="AnimatedSprite" type="AnimatedSprite" parent="."]
 position = Vector2( 0, -8 )

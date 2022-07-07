@@ -871,6 +871,12 @@ public class MainSceneController : Node2D
 			{
 				CauseExplosion(grenade.Position, grenade.ExplosionRadius, grenade.PaintColor, ESound.GrenadeExplode);
 
+				OneShotParticles particles = grenade.DieParticlesPackedScene.Instance<OneShotParticles>();
+				node_grenadeDieParticles.AddChild(particles);
+
+				particles.Position = grenade.Position;
+				particles.SelfModulate = PaintColors.GetColorFromPaintColor(grenade.PaintColor);
+
 				grenade.QueueFree();
 				node_grenades.RemoveChild(grenade);
 				m_grenadesList.RemoveAt(i);
