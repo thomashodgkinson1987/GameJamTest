@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://sprites/ui/item_icons/atlastexture_machinegunicon.tres" type="Texture" id=1]
+[ext_resource path="res://scenes/PickUps/PickUp.tscn" type="PackedScene" id=2]
+
+[node name="PickUp_MachineGun" instance=ExtResource( 2 )]
+PickUpType = 3
+
+[node name="Sprite" parent="." index="0"]
+texture = ExtResource( 1 )

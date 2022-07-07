@@ -1,4 +1,4 @@
-[gd_scene load_steps=29 format=2]
+[gd_scene load_steps=36 format=2]
 
 [ext_resource path="res://resources/tilesets/tileset_0001.tres" type="TileSet" id=1]
 [ext_resource path="res://scripts/MainSceneController.cs" type="Script" id=2]
@@ -26,6 +26,13 @@
 [ext_resource path="res://scenes/Sounds/Guns/OneShotSound_SniperRifleShoot.tscn" type="PackedScene" id=24]
 [ext_resource path="res://scenes/Sounds/Guns/OneShotSound_StandardGunShoot.tscn" type="PackedScene" id=25]
 [ext_resource path="res://scenes/Sounds/Guns/OneShotSound_GenadeExplode.tscn" type="PackedScene" id=26]
+[ext_resource path="res://scenes/PickUps/PickUp_Rifle.tscn" type="PackedScene" id=27]
+[ext_resource path="res://scenes/PickUps/PickUp_PaintGloves.tscn" type="PackedScene" id=28]
+[ext_resource path="res://scenes/PickUps/PickUp_MachineGun.tscn" type="PackedScene" id=29]
+[ext_resource path="res://scenes/PickUps/PickUp_SniperRifle.tscn" type="PackedScene" id=30]
+[ext_resource path="res://scenes/PickUps/PickUp_PaintShoes.tscn" type="PackedScene" id=31]
+[ext_resource path="res://scenes/PickUps/PickUp_BigBadBooties.tscn" type="PackedScene" id=32]
+[ext_resource path="res://scenes/PickUps/PickUp_Grenade.tscn" type="PackedScene" id=33]
 
 [sub_resource type="DynamicFontData" id=1]
 antialiased = false
@@ -123,6 +130,47 @@ position = Vector2( 424, 136 )
 
 [node name="OneWayPlatform17" parent="OneWayPlatforms" instance=ExtResource( 10 )]
 position = Vector2( 440, 136 )
+
+[node name="PickUps" type="Node2D" parent="."]
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="PickUp_BigBadBooties" parent="PickUps" instance=ExtResource( 32 )]
+position = Vector2( 40, 296 )
+
+[node name="PickUp_PaintGloves" parent="PickUps" instance=ExtResource( 28 )]
+position = Vector2( 72, 296 )
+
+[node name="PickUp_PaintShoes" parent="PickUps" instance=ExtResource( 31 )]
+position = Vector2( 104, 296 )
+
+[node name="PickUp_Rifle" parent="PickUps" instance=ExtResource( 27 )]
+position = Vector2( 136, 296 )
+
+[node name="PickUp_MachineGun" parent="PickUps" instance=ExtResource( 29 )]
+position = Vector2( 168, 296 )
+
+[node name="PickUp_SniperRifle" parent="PickUps" instance=ExtResource( 30 )]
+position = Vector2( 200, 296 )
+
+[node name="PickUp_Rifle2" parent="PickUps" instance=ExtResource( 27 )]
+position = Vector2( 248, 280 )
+
+[node name="PickUp_MachineGun2" parent="PickUps" instance=ExtResource( 29 )]
+position = Vector2( 280, 280 )
+
+[node name="PickUp_SniperRifle2" parent="PickUps" instance=ExtResource( 30 )]
+position = Vector2( 312, 280 )
+
+[node name="PickUp_Grenade" parent="PickUps" instance=ExtResource( 33 )]
+position = Vector2( 472, 216 )
+
+[node name="PickUp_Grenade2" parent="PickUps" instance=ExtResource( 33 )]
+position = Vector2( 312, 200 )
+
+[node name="PickUp_Grenade3" parent="PickUps" instance=ExtResource( 33 )]
+position = Vector2( 104, 120 )
 
 [node name="Player" parent="." instance=ExtResource( 4 )]
 position = Vector2( 376, 280 )
@@ -251,7 +299,7 @@ margin_top = 2.0
 margin_right = 16.0
 margin_bottom = 14.0
 custom_fonts/font = SubResource( 2 )
-text = "9"
+text = "3"
 align = 1
 valign = 1
 

@@ -61,10 +61,13 @@ public class MainSceneController : Node2D
 	private TextureRect node_player1UI_sniperRifleIcon;
 	private Label node_player1UI_sniperRifleBulletCount;
 
+	private Control node_player1UI_paintGlovesUI;
 	private TextureRect node_player1UI_paintGlovesIcon;
 
+	private Control node_player1UI_paintShoesUI;
 	private TextureRect node_player1UI_paintShoesIcon;
 
+	private Control node_player1UI_bigBadBootiesUI;
 	private TextureRect node_player1UI_bigBadBootiesIcon;
 
 	#endregion // Nodes
@@ -153,8 +156,13 @@ public class MainSceneController : Node2D
 		node_player1UI_sniperRifleIcon = GetNode<TextureRect>("UI/Player1UI/SniperRifleUI/SniperRifleIcon");
 		node_player1UI_sniperRifleBulletCount = GetNode<Label>("UI/Player1UI/SniperRifleUI/SniperRifleBulletCountContainer/SniperRifleBulletCount");
 
+		node_player1UI_paintGlovesUI = GetNode<Control>("UI/Player1UI/PaintGlovesUI");
 		node_player1UI_paintGlovesIcon = GetNode<TextureRect>("UI/Player1UI/PaintGlovesUI/PaintGlovesIcon");
+
+		node_player1UI_paintShoesUI = GetNode<Control>("UI/Player1UI/PaintShoesUI");
 		node_player1UI_paintShoesIcon = GetNode<TextureRect>("UI/Player1UI/PaintShoesUI/PaintShoesIcon");
+
+		node_player1UI_bigBadBootiesUI = GetNode<Control>("UI/Player1UI/BigBadBootiesUI");
 		node_player1UI_bigBadBootiesIcon = GetNode<TextureRect>("UI/Player1UI/BigBadBootiesUI/BigBadBootiesIcon");
 	}
 
@@ -279,25 +287,25 @@ public class MainSceneController : Node2D
 		node_player1UI_grenadeIcon.SelfModulate = PaintColors.GetColorFromPaintColor(node_player.GrenadePaintColor);
 		node_player1UI_grenadeCount.Text = node_player.GrenadesCount.ToString();
 
-		node_player1UI_rifleUI.Visible = node_player.HasRifle;
+		node_player1UI_rifleUI.Visible = node_player.GunEquipSlot == Player.EGunEquipSlot.Rifle;
 		node_player1UI_rifleIcon.SelfModulate = PaintColors.GetColorFromPaintColor(node_player.RiflePaintColor);
 		node_player1UI_rifleBulletCount.Text = node_player.RifleBulletsCount.ToString();
 
-		node_player1UI_machineGunUI.Visible = node_player.HasMachineGun;
+		node_player1UI_machineGunUI.Visible = node_player.GunEquipSlot == Player.EGunEquipSlot.MachineGun;
 		node_player1UI_machineGunIcon.SelfModulate = PaintColors.GetColorFromPaintColor(node_player.MachineGunPaintColor);
 		node_player1UI_machineGunBulletCount.Text = node_player.MachineGunBulletsCount.ToString();
 
-		node_player1UI_sniperRifleUI.Visible = node_player.HasSniperRifle;
+		node_player1UI_sniperRifleUI.Visible = node_player.GunEquipSlot == Player.EGunEquipSlot.SniperRifle;
 		node_player1UI_sniperRifleIcon.SelfModulate = PaintColors.GetColorFromPaintColor(node_player.SniperRiflePaintColor);
 		node_player1UI_sniperRifleBulletCount.Text = node_player.SniperRifleBulletsCount.ToString();
 
-		node_player1UI_paintGlovesIcon.Visible = node_player.HasPaintGloves;
+		node_player1UI_paintGlovesUI.Visible = node_player.HasPaintGloves;
 		node_player1UI_paintGlovesIcon.SelfModulate = PaintColors.GetColorFromPaintColor(node_player.PaintGlovesPaintColor);
 
-		node_player1UI_paintShoesIcon.Visible = node_player.HasPaintShoes;
+		node_player1UI_paintShoesUI.Visible = node_player.HasPaintShoes;
 		node_player1UI_paintShoesIcon.SelfModulate = PaintColors.GetColorFromPaintColor(node_player.PaintShoesPaintColor);
 
-		node_player1UI_bigBadBootiesIcon.Visible = node_player.HasBigBadBooties;
+		node_player1UI_bigBadBootiesUI.Visible = node_player.HasBigBadBooties;
 		node_player1UI_bigBadBootiesIcon.SelfModulate = PaintColors.GetColorFromPaintColor(node_player.BigBadBootiesPaintColor);
 	}
 
@@ -569,6 +577,10 @@ public class MainSceneController : Node2D
 						if (!node_player.IsInfiniteRifleAmmunition)
 						{
 							node_player.RifleBulletsCount--;
+							if (node_player.RifleBulletsCount == 0)
+							{
+								node_player.GunEquipSlot = Player.EGunEquipSlot.None;
+							}
 						}
 						SpawnRifleBullet(position, direction, node_player.RiflePaintColor);
 					}
@@ -579,6 +591,10 @@ public class MainSceneController : Node2D
 						if (!node_player.IsInfiniteMachineGunAmmunition)
 						{
 							node_player.MachineGunBulletsCount--;
+							if (node_player.MachineGunBulletsCount == 0)
+							{
+								node_player.GunEquipSlot = Player.EGunEquipSlot.None;
+							}
 						}
 						SpawnMachineGunBullet(position, direction, node_player.MachineGunPaintColor);
 						node_player.MachineGunFireRateTimer = 0f;
@@ -590,6 +606,10 @@ public class MainSceneController : Node2D
 						if (!node_player.IsInfiniteSniperRifleAmmunition)
 						{
 							node_player.SniperRifleBulletsCount--;
+							if (node_player.SniperRifleBulletsCount == 0)
+							{
+								node_player.GunEquipSlot = Player.EGunEquipSlot.None;
+							}
 						}
 						SpawnSniperRifleBullet(position, direction, node_player.SniperRiflePaintColor);
 					}

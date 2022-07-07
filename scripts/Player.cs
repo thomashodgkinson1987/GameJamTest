@@ -81,19 +81,17 @@ public class Player : KinematicBody2D
 	public bool WasShootReleased { get; set; } = false;
 	public bool WasThrowGrenadeReleased { get; set; } = false;
 
-	[Export] public bool IsInfiniteJumps { get; set; } = true;
+	[Export] public bool IsInfiniteJumps { get; set; } = false;
 
-	[Export] public bool IsInfinitePowerGauge { get; set; } = true;
+	[Export] public bool IsInfinitePowerGauge { get; set; } = false;
 
-	[Export] public bool IsInfiniteGrenades { get; set; } = true;
+	[Export] public bool IsInfiniteGrenades { get; set; } = false;
 
-	[Export] public bool IsInfiniteRifleAmmunition { get; set; } = true;
-	[Export] public bool IsInfiniteMachineGunAmmunition { get; set; } = true;
-	[Export] public bool IsInfiniteSniperRifleAmmunition { get; set; } = true;
+	[Export] public bool IsInfiniteRifleAmmunition { get; set; } = false;
+	[Export] public bool IsInfiniteMachineGunAmmunition { get; set; } = false;
+	[Export] public bool IsInfiniteSniperRifleAmmunition { get; set; } = false;
 
-	[Export] public bool HasRifle { get; set; } = false;
-	[Export] public bool HasMachineGun { get; set; } = false;
-	[Export] public bool HasSniperRifle { get; set; } = false;
+	[Export] public EGunEquipSlot GunEquipSlot { get; set; } = EGunEquipSlot.None;
 
 	[Export] public bool HasPaintGloves { get; set; } = false;
 	[Export] public bool HasPaintShoes { get; set; } = false;
@@ -116,9 +114,6 @@ public class Player : KinematicBody2D
 
 	[Export] public float AimingLineLength { get; set; } = 16f;
 
-	//[Export] public EBulletType BulletType { get; set; } = EBulletType.Standard;
-	[Export] public EGunEquipSlot GunEquipSlot { get; set; } = EGunEquipSlot.None;
-
 	[Export] public float PowerGaugeLimit { get; set; } = 100f;
 	[Export] public float PowerGaugeCurrent { get; set; } = 100f;
 	[Export] public float PowerGaugeRechargeRate { get; set; } = 0.5f;
@@ -127,9 +122,9 @@ public class Player : KinematicBody2D
 
 	[Export] public int GrenadesCount { get; set; } = 3;
 
-	[Export] public int RifleBulletsCount { get; set; } = 8;
-	[Export] public int MachineGunBulletsCount { get; set; } = 8;
-	[Export] public int SniperRifleBulletsCount { get; set; } = 8;
+	[Export] public int RifleBulletsCount { get; set; } = 0;
+	[Export] public int MachineGunBulletsCount { get; set; } = 0;
+	[Export] public int SniperRifleBulletsCount { get; set; } = 0;
 
 	[Export] public float MachineGunFireRate { get; set; } = 0.1f;
 	[Export] public float MachineGunFireRateTimer { get; set; } = 0f;
