@@ -74,7 +74,7 @@ public class Projectile : KinematicBody2D
 
 	#region Public methods
 
-	public void SetPaintColor (EPaintColor paintColor)
+	public virtual void SetPaintColor (EPaintColor paintColor)
 	{
 		PaintColor = paintColor;
 		node_sprite.SelfModulate = PaintColors.GetColorFromPaintColor(paintColor);
