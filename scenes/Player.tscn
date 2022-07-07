@@ -7,12 +7,11 @@
 _data = [ Vector2( 0, 0 ), 0.0, 1.0, 0, 1, Vector2( 1, 1 ), 1.0, 0.0, 1, 0 ]
 
 [sub_resource type="RectangleShape2D" id=1]
-extents = Vector2( 4, 7 )
+extents = Vector2( 4, 5.5 )
 
 [node name="Player" type="KinematicBody2D"]
 collision_mask = 18
 script = ExtResource( 2 )
-PaintColor = 1
 
 [node name="AnimatedSprite" type="AnimatedSprite" parent="."]
 position = Vector2( 0, -8 )
@@ -33,7 +32,7 @@ __meta__ = {
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 visible = false
-position = Vector2( 0, -7 )
+position = Vector2( 0, -5.5 )
 shape = SubResource( 1 )
 __meta__ = {
 "_edit_lock_": true

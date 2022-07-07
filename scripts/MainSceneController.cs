@@ -10,7 +10,8 @@ public class MainSceneController : Node2D
 	public enum ESound
 	{
 		PlayerJump, PlayerLand,
-		StandardGunShoot, RifleShoot, MachineGunShoot, SniperRifleShoot
+		StandardGunShoot, GrenadeExplode,
+		RifleShoot, MachineGunShoot, SniperRifleShoot
 	}
 
 	#endregion // Enums
@@ -38,6 +39,7 @@ public class MainSceneController : Node2D
 
 	// UI
 
+	private Control node_player1UI;
 
 	private TextureRect node_player1UI_playerIcon;
 
@@ -65,8 +67,6 @@ public class MainSceneController : Node2D
 
 	private TextureRect node_player1UI_bigBadBootiesIcon;
 
-	// END UI
-
 	#endregion // Nodes
 
 
@@ -74,19 +74,20 @@ public class MainSceneController : Node2D
 	#region Fields
 
 	[Export] private PackedScene m_standardBulletPackedScene;
+	[Export] private PackedScene m_grenadePackedScene;
 	[Export] private PackedScene m_rifleBulletPackedScene;
 	[Export] private PackedScene m_machineGunBulletPackedScene;
 	[Export] private PackedScene m_sniperRifleBulletPackedScene;
-	[Export] private PackedScene m_grenadePackedScene;
 	[Export] private PackedScene m_lightMaskPackedScene;
 
-	[Export] private PackedScene m_playerJumpSound;
-	[Export] private PackedScene m_playerLandSound;
+	[Export] private PackedScene m_playerJumpOneShotSoundPackedScene;
+	[Export] private PackedScene m_playerLandOneShotSoundPackedScene;
 
-	[Export] private PackedScene m_standardGunShootSound;
-	[Export] private PackedScene m_rifleShootSound;
-	[Export] private PackedScene m_machineGunShootSound;
-	[Export] private PackedScene m_sniperRifleShootSound;
+	[Export] private PackedScene m_standardGunShootOneShotSoundPackedScene;
+	[Export] private PackedScene m_grenadeExplodeOneShotSoundPackedScene;
+	[Export] private PackedScene m_rifleShootOneShotSoundPackedScene;
+	[Export] private PackedScene m_machineGunShootOneShotSoundPackedScene;
+	[Export] private PackedScene m_sniperRifleShootOneShotSoundPackedScene;
 
 	private int m_tileWidth = 16;
 	private int m_tileHeight = 16;
@@ -130,6 +131,8 @@ public class MainSceneController : Node2D
 
 		// UI
 
+		node_player1UI = GetNode<Control>("UI/Player1UI");
+
 		node_player1UI_playerIcon = GetNode<TextureRect>("UI/Player1UI/PlayerIcon");
 
 		node_player1UI_powerGauge = GetNode<TextureProgress>("UI/Player1UI/PowerGaugeUI/PowerGaugeContainer/PowerGauge");
@@ -153,21 +156,18 @@ public class MainSceneController : Node2D
 		node_player1UI_paintGlovesIcon = GetNode<TextureRect>("UI/Player1UI/PaintGlovesUI/PaintGlovesIcon");
 		node_player1UI_paintShoesIcon = GetNode<TextureRect>("UI/Player1UI/PaintShoesUI/PaintShoesIcon");
 		node_player1UI_bigBadBootiesIcon = GetNode<TextureRect>("UI/Player1UI/BigBadBootiesUI/BigBadBootiesIcon");
+	}
 
-		// END UI
-
+	public override void _Ready ()
+	{
 		m_lightMasksArray = new LightMask[m_tileMapHeight, m_tileMapWidth];
 		m_lightMasksList = new List<LightMask>();
 
 		m_bulletsList = new List<Bullet>();
 		m_grenadesList = new List<Grenade>();
-	}
 
-	public override void _Ready ()
-	{
 		PopulateLightMasks();
-
-		node_player1UI_powerGauge.Value = node_player.PowerGaugeCurrent;
+		UpdateUI();
 	}
 
 	public override void _Input (InputEvent @event)
@@ -224,19 +224,19 @@ public class MainSceneController : Node2D
 
 		if (Input.IsPhysicalKeyPressed((int)KeyList.Q))
 		{
-			node_player.BulletType = Player.EBulletType.Standard;
+			node_player.GunEquipSlot = Player.EGunEquipSlot.None;
 		}
 		else if (Input.IsPhysicalKeyPressed((int)KeyList.W))
 		{
-			node_player.BulletType = Player.EBulletType.Rifle;
+			node_player.GunEquipSlot = Player.EGunEquipSlot.Rifle;
 		}
 		else if (Input.IsPhysicalKeyPressed((int)KeyList.E))
 		{
-			node_player.BulletType = Player.EBulletType.MachineGun;
+			node_player.GunEquipSlot = Player.EGunEquipSlot.MachineGun;
 		}
 		else if (Input.IsPhysicalKeyPressed((int)KeyList.R))
 		{
-			node_player.BulletType = Player.EBulletType.SniperRifle;
+			node_player.GunEquipSlot = Player.EGunEquipSlot.SniperRifle;
 		}
 	}
 
@@ -269,24 +269,56 @@ public class MainSceneController : Node2D
 		}
 	}
 
-	public void SetLightMaskColor (int x, int y, EPaintColor paintColor)
+	private void UpdateUI ()
+	{
+		node_player1UI_playerIcon.SelfModulate = PaintColors.GetColorFromPaintColor(node_player.PaintColor);
+
+		node_player1UI_powerGauge.SelfModulate = PaintColors.GetColorFromPaintColor(node_player.PowerGaugePaintColor);
+		node_player1UI_powerGauge.Value = node_player.PowerGaugeCurrent;
+
+		node_player1UI_grenadeIcon.SelfModulate = PaintColors.GetColorFromPaintColor(node_player.GrenadePaintColor);
+		node_player1UI_grenadeCount.Text = node_player.GrenadesCount.ToString();
+
+		node_player1UI_rifleUI.Visible = node_player.HasRifle;
+		node_player1UI_rifleIcon.SelfModulate = PaintColors.GetColorFromPaintColor(node_player.RiflePaintColor);
+		node_player1UI_rifleBulletCount.Text = node_player.RifleBulletsCount.ToString();
+
+		node_player1UI_machineGunUI.Visible = node_player.HasMachineGun;
+		node_player1UI_machineGunIcon.SelfModulate = PaintColors.GetColorFromPaintColor(node_player.MachineGunPaintColor);
+		node_player1UI_machineGunBulletCount.Text = node_player.MachineGunBulletsCount.ToString();
+
+		node_player1UI_sniperRifleUI.Visible = node_player.HasSniperRifle;
+		node_player1UI_sniperRifleIcon.SelfModulate = PaintColors.GetColorFromPaintColor(node_player.SniperRiflePaintColor);
+		node_player1UI_sniperRifleBulletCount.Text = node_player.SniperRifleBulletsCount.ToString();
+
+		node_player1UI_paintGlovesIcon.Visible = node_player.HasPaintGloves;
+		node_player1UI_paintGlovesIcon.SelfModulate = PaintColors.GetColorFromPaintColor(node_player.PaintGlovesPaintColor);
+
+		node_player1UI_paintShoesIcon.Visible = node_player.HasPaintShoes;
+		node_player1UI_paintShoesIcon.SelfModulate = PaintColors.GetColorFromPaintColor(node_player.PaintShoesPaintColor);
+
+		node_player1UI_bigBadBootiesIcon.Visible = node_player.HasBigBadBooties;
+		node_player1UI_bigBadBootiesIcon.SelfModulate = PaintColors.GetColorFromPaintColor(node_player.BigBadBootiesPaintColor);
+	}
+
+	private void SetLightMaskColor (int x, int y, EPaintColor paintColor)
 	{
 		Color color = PaintColors.GetColorFromPaintColor(paintColor);
 		SetLightMaskColor(x, y, color);
 	}
 
-	public void SetLightMaskColor (int x, int y, Color color)
+	private void SetLightMaskColor (int x, int y, Color color)
 	{
 		m_lightMasksArray[y, x].Color = color;
 	}
 
-	public void SetLightMaskColor (LightMask lightMask, EPaintColor paintColor)
+	private void SetLightMaskColor (LightMask lightMask, EPaintColor paintColor)
 	{
 		Color color = PaintColors.GetColorFromPaintColor(paintColor);
 		SetLightMaskColor(lightMask, color);
 	}
 
-	public void SetLightMaskColor (LightMask lightMask, Color color)
+	private void SetLightMaskColor (LightMask lightMask, Color color)
 	{
 		lightMask.Color = color;
 	}
@@ -322,78 +354,38 @@ public class MainSceneController : Node2D
 		node_player.IsThrowGrenadeReleased = false;
 
 		node_player.WasOnGround = node_player.IsOnGround;
+
 		node_player.IsOnGround = false;
 
 		if (Input.IsActionPressed("PlayerMoveLeft"))
-		{
 			node_player.IsMoveLeftPressed = true;
-		}
-		else
-		{
-			if (node_player.WasMoveLeftPressed)
-			{
-				node_player.IsMoveLeftReleased = true;
-			}
-		}
+		else if (node_player.WasMoveLeftPressed)
+			node_player.IsMoveLeftReleased = true;
+
 		if (Input.IsActionPressed("PlayerMoveRight"))
-		{
 			node_player.IsMoveRightPressed = true;
-		}
-		else
-		{
-			if (node_player.WasMoveRightPressed)
-			{
-				node_player.IsMoveRightReleased = true;
-			}
-		}
+		else if (node_player.WasMoveRightPressed)
+			node_player.IsMoveRightReleased = true;
 
 		if (Input.IsActionPressed("PlayerDown"))
-		{
 			node_player.IsDownPressed = true;
-		}
-		else
-		{
-			if (node_player.WasDownPressed)
-			{
-				node_player.IsDownReleased = true;
-			}
-		}
+		else if (node_player.WasDownPressed)
+			node_player.IsDownReleased = true;
 
 		if (Input.IsActionPressed("PlayerJump"))
-		{
 			node_player.IsJumpPressed = true;
-		}
-		else
-		{
-			if (node_player.WasJumpPressed)
-			{
-				node_player.IsJumpReleased = true;
-			}
-		}
+		else if (node_player.WasJumpPressed)
+			node_player.IsJumpReleased = true;
 
 		if (Input.IsActionPressed("PlayerShoot"))
-		{
 			node_player.IsShootPressed = true;
-		}
-		else
-		{
-			if (node_player.WasShootPressed)
-			{
-				node_player.IsShootReleased = true;
-			}
-		}
+		else if (node_player.WasShootPressed)
+			node_player.IsShootReleased = true;
 
 		if (Input.IsActionPressed("PlayerThrowGrenade"))
-		{
 			node_player.IsThrowGrenadePressed = true;
-		}
-		else
-		{
-			if (node_player.WasThrowGrenadePressed)
-			{
-				node_player.IsThrowGrenadeReleased = true;
-			}
-		}
+		else if (node_player.WasThrowGrenadePressed)
+			node_player.IsThrowGrenadeReleased = true;
 
 		Vector2 playerVelocity = node_player.Velocity;
 
@@ -429,50 +421,37 @@ public class MainSceneController : Node2D
 
 		if (!node_player.IsDownPressed)
 		{
-			if (node_player.IsOnWall())
-			{
-				playerVelocity.y += node_player.WallSlideFallAcceleration * delta;
-			}
-			else
-			{
-				playerVelocity.y += node_player.FallAcceleration * delta;
-			}
+			float fallAcceleration = node_player.IsOnWall() ? node_player.WallSlideFallAcceleration : node_player.FallAcceleration;
+			playerVelocity.y += fallAcceleration * delta;
 		}
 		else
 		{
-			if (node_player.IsOnWall())
-			{
-				playerVelocity.y += node_player.WallSlideFallAcceleration * 2f * delta;
-			}
-			else
-			{
-				playerVelocity.y += node_player.HoldDownFallAcceleration * delta;
-			}
+			float fallAcceleration = node_player.IsOnWall() ? node_player.WallSlideFallAcceleration * 2f : node_player.HoldDownFallAcceleration;
+			playerVelocity.y += fallAcceleration * delta;
 		}
 
 		if (node_player.IsJumpPressed && !node_player.WasJumpPressed)
 		{
 			if (node_player.JumpCount < node_player.JumpLimit || node_player.IsInfiniteJumps)
 			{
-				node_player.JumpCount++;
+				if (!node_player.IsInfiniteJumps)
+					node_player.JumpCount++;
+
 				if (playerVelocity.y >= 0)
 				{
-					playerVelocity.y = -Mathf.Sqrt(2 * node_player.JumpHeight * node_player.FallAcceleration);
+					playerVelocity.y = -Mathf.Sqrt(2 * node_player.FallAcceleration * node_player.JumpHeight);
 				}
 				else
 				{
-					playerVelocity.y += -Mathf.Sqrt(2 * node_player.JumpHeight * node_player.FallAcceleration);
+					playerVelocity.y += -Mathf.Sqrt(2 * node_player.FallAcceleration * node_player.JumpHeight);
 				}
-				node_player.IsJumping = true;
+
 				PlaySound(ESound.PlayerJump);
 			}
 		}
-		else if (!node_player.IsJumpPressed)
+		else if (!node_player.IsJumpPressed && playerVelocity.y < 0)
 		{
-			if (playerVelocity.y < 0)
-			{
-				playerVelocity.y += node_player.FallAcceleration * 1 * delta;
-			}
+			playerVelocity.y += node_player.FallAcceleration * 1 * delta;
 		}
 
 		node_player.Velocity = node_player.MoveAndSlide(playerVelocity, Vector2.Up);
@@ -480,30 +459,46 @@ public class MainSceneController : Node2D
 		if (node_player.IsOnFloor())
 		{
 			node_player.IsOnGround = true;
-			node_player.IsJumping = false;
-			node_player.IsFalling = false;
-		}
-		else if (node_player.IsOnCeiling())
-		{
-			node_player.IsOnGround = false;
-			node_player.IsJumping = false;
-			node_player.IsFalling = true;
-		}
-		else
-		{
-			node_player.IsOnGround = false;
-			node_player.IsJumping = false;
-			node_player.IsFalling = true;
 		}
 
 		if (node_player.IsOnGround)
 		{
-			node_player.JumpCount = 0;
+			if (!node_player.WasOnGround)
+			{
+				node_player.JumpCount = 0;
+				PlaySound(ESound.PlayerLand);
+			}
+
 			if (node_player.IsDownPressed && !node_player.WasDownPressed)
 			{
 				node_player.DisableOneWayPlatformCollision();
 				node_player.DisableOneWayCollisionTimer = 0f;
 			}
+
+			if (node_player.HasPaintShoes)
+			{
+				float x = node_player.Position.x;
+				float y = node_player.Position.y;
+
+				if (y <= (m_tileHeight * m_tileMapHeight) - m_tileHeight)
+				{
+					for (int i = -1; i < 2; i++)
+					{
+						int tileX = Mathf.FloorToInt((x + (i * 4)) / m_tileWidth);
+						int tileY = Mathf.FloorToInt(y / m_tileHeight) + 1;
+						if (node_tileMap.GetCell(tileX, tileY) != -1)
+						{
+							SetLightMaskColor(tileX, tileY, node_player.PaintColor);
+						}
+					}
+				}
+			}
+
+			node_player.node_animatedSprite.Play(node_player.Velocity.x != 0 ? "walk" : "idle");
+		}
+		else
+		{
+			node_player.node_animatedSprite.Play("jump");
 		}
 
 		if (node_player.DisableOneWayCollisionTimer < node_player.DisableOneWayCollisionTime)
@@ -518,9 +513,7 @@ public class MainSceneController : Node2D
 
 		if (m_isUsingKeyboardAndMouse)
 		{
-			Vector2 mousePosition = GetGlobalMousePosition();
-			Vector2 diff = mousePosition - node_player.node_projectileSpawnPosition.GlobalPosition;
-			diff = diff.Normalized();
+			Vector2 diff = (GetGlobalMousePosition() - node_player.node_projectileSpawnPosition.GlobalPosition).Normalized();
 			if (diff.x != 0 || diff.y != 0)
 			{
 				node_player.AimingDirection = diff;
@@ -530,8 +523,7 @@ public class MainSceneController : Node2D
 		{
 			Vector2 inputDirection = Input.GetVector("PlayerAimLeft", "PlayerAimRight", "PlayerAimUp", "PlayerAimDown");
 			Vector2 target = node_player.node_projectileSpawnPosition.GlobalPosition + inputDirection;
-			Vector2 diff = target - node_player.node_projectileSpawnPosition.GlobalPosition;
-			diff = diff.Normalized();
+			Vector2 diff = (target - node_player.node_projectileSpawnPosition.GlobalPosition).Normalized();
 			if (diff.x != 0 || diff.y != 0)
 			{
 				node_player.AimingDirection = diff;
@@ -541,35 +533,9 @@ public class MainSceneController : Node2D
 		node_player.SetAimingLineDirection(node_player.AimingDirection);
 
 		if (node_player.AimingDirection.x < 0)
-		{
-			node_player.FacingDirection = Player.EFacingDirection.Left;
 			node_player.node_animatedSprite.FlipH = true;
-		}
 		else if (node_player.AimingDirection.x > 0)
-		{
-			node_player.FacingDirection = Player.EFacingDirection.Right;
 			node_player.node_animatedSprite.FlipH = false;
-		}
-
-		if (node_player.HasPaintShoes && node_player.IsOnGround)
-		{
-			float x = node_player.Position.x;
-			float y = node_player.Position.y;
-
-			if (y <= (m_tileHeight * m_tileMapHeight) - m_tileHeight)
-			{
-				for (int i = -1; i < 2; i++)
-				{
-					int tileX = Mathf.FloorToInt((x + (i * 4)) / m_tileWidth);
-					int tileY = Mathf.FloorToInt(y / m_tileHeight) + 1;
-
-					if (node_tileMap.GetCell(tileX, tileY) != -1)
-					{
-						SetLightMaskColor(tileX, tileY, node_player.PaintColor);
-					}
-				}
-			}
-		}
 
 		if (node_player.PowerGaugeCurrent < node_player.PowerGaugeLimit)
 		{
@@ -584,80 +550,83 @@ public class MainSceneController : Node2D
 		{
 			Vector2 position = node_player.node_projectileSpawnPosition.GlobalPosition;
 			Vector2 direction = node_player.AimingDirection;
-			EPaintColor paintColor = node_player.PaintColor;
-			Player.EBulletType bulletType = node_player.BulletType;
 
-			switch (node_player.BulletType)
+			switch (node_player.GunEquipSlot)
 			{
-				case Player.EBulletType.Standard:
-					if (node_player.PowerGaugeCurrent >= node_player.StandardBulletPowerCost)
+				case Player.EGunEquipSlot.None:
+					if (node_player.PowerGaugeCurrent >= node_player.StandardBulletPowerCost || node_player.IsInfinitePowerGauge)
 					{
-						node_player.PowerGaugeCurrent -= node_player.StandardBulletPowerCost;
-						SpawnBullet(position, direction, paintColor, bulletType);
+						if (!node_player.IsInfinitePowerGauge)
+						{
+							node_player.PowerGaugeCurrent -= node_player.StandardBulletPowerCost;
+						}
+						SpawnStandardBullet(position, direction, node_player.PowerGaugePaintColor);
 					}
 					break;
-				case Player.EBulletType.Rifle:
-					if (node_player.RifleBullets > 0 || node_player.IsInfiniteAmmo)
+				case Player.EGunEquipSlot.Rifle:
+					if (node_player.RifleBulletsCount > 0 || node_player.IsInfiniteRifleAmmunition)
 					{
-						if (!node_player.IsInfiniteAmmo)
+						if (!node_player.IsInfiniteRifleAmmunition)
 						{
-							node_player.RifleBullets--;
+							node_player.RifleBulletsCount--;
 						}
-						SpawnBullet(position, direction, paintColor, bulletType);
+						SpawnRifleBullet(position, direction, node_player.RiflePaintColor);
 					}
 					break;
-				case Player.EBulletType.MachineGun:
-					if (node_player.MachineGunBullets > 0 || node_player.IsInfiniteAmmo)
+				case Player.EGunEquipSlot.MachineGun:
+					if (node_player.MachineGunBulletsCount > 0 || node_player.IsInfiniteMachineGunAmmunition)
 					{
-						if (!node_player.IsInfiniteAmmo)
+						if (!node_player.IsInfiniteMachineGunAmmunition)
 						{
-							node_player.MachineGunBullets--;
+							node_player.MachineGunBulletsCount--;
 						}
-						SpawnBullet(position, direction, paintColor, bulletType);
+						SpawnMachineGunBullet(position, direction, node_player.MachineGunPaintColor);
 						node_player.MachineGunFireRateTimer = 0f;
 					}
 					break;
-				case Player.EBulletType.SniperRifle:
-					if (node_player.SniperRifleBullets > 0 || node_player.IsInfiniteAmmo)
+				case Player.EGunEquipSlot.SniperRifle:
+					if (node_player.SniperRifleBulletsCount > 0 || node_player.IsInfiniteSniperRifleAmmunition)
 					{
-						if (!node_player.IsInfiniteAmmo)
+						if (!node_player.IsInfiniteSniperRifleAmmunition)
 						{
-							node_player.SniperRifleBullets--;
+							node_player.SniperRifleBulletsCount--;
 						}
-						SpawnBullet(position, direction, paintColor, bulletType);
+						SpawnSniperRifleBullet(position, direction, node_player.SniperRiflePaintColor);
 					}
 					break;
 				default:
 					if (node_player.PowerGaugeCurrent >= node_player.StandardBulletPowerCost)
 					{
 						node_player.PowerGaugeCurrent -= node_player.StandardBulletPowerCost;
-						SpawnBullet(position, direction, paintColor, bulletType);
+						SpawnStandardBullet(position, direction, node_player.PowerGaugePaintColor);
 					}
 					break;
 			}
 		}
 		else if (node_player.IsShootPressed && node_player.WasShootPressed)
 		{
-			if (node_player.BulletType == Player.EBulletType.MachineGun)
+			if (node_player.GunEquipSlot == Player.EGunEquipSlot.MachineGun)
 			{
 				node_player.MachineGunFireRateTimer += delta;
 				if (node_player.MachineGunFireRateTimer >= node_player.MachineGunFireRate)
 				{
-					if (node_player.MachineGunBullets > 0 || node_player.IsInfiniteAmmo)
+					if (node_player.MachineGunBulletsCount > 0 || node_player.IsInfiniteMachineGunAmmunition)
 					{
-						if (!node_player.IsInfiniteAmmo)
+						if (!node_player.IsInfiniteMachineGunAmmunition)
 						{
-							node_player.MachineGunBullets--;
+							node_player.MachineGunBulletsCount--;
 						}
 						Vector2 position = node_player.node_projectileSpawnPosition.GlobalPosition;
 						Vector2 direction = node_player.AimingDirection;
-						EPaintColor paintColor = node_player.PaintColor;
-						Player.EBulletType bulletType = node_player.BulletType;
-						SpawnBullet(position, direction, paintColor, bulletType);
+						SpawnMachineGunBullet(position, direction, node_player.MachineGunPaintColor);
 					}
 					node_player.MachineGunFireRateTimer = 0f;
 				}
 			}
+		}
+		else if (!node_player.IsShootPressed && node_player.WasShootPressed)
+		{
+			node_player.MachineGunFireRateTimer = 0f;
 		}
 
 		if (node_player.IsThrowGrenadePressed)
@@ -671,20 +640,14 @@ public class MainSceneController : Node2D
 				}
 			}
 		}
-
-		if (!node_player.IsThrowGrenadePressed && node_player.WasThrowGrenadePressed)
+		else if (!node_player.IsThrowGrenadePressed && node_player.WasThrowGrenadePressed)
 		{
-			if (node_player.NumberOfGrenades > 0 || node_player.IsInfiniteGrenades)
+			if (node_player.GrenadesCount > 0 || node_player.IsInfiniteGrenades)
 			{
-				node_player.NumberOfGrenades--;
-
-				if (node_player.NumberOfGrenades < 0)
+				if (!node_player.IsInfiniteGrenades)
 				{
-					node_player.NumberOfGrenades = 0;
+					node_player.GrenadesCount--;
 				}
-
-				Vector2 position = node_player.node_projectileSpawnPosition.GlobalPosition;
-				Vector2 velocity = Vector2.Zero;
 
 				float per = node_player.GrenadeThrowTimer / node_player.GrenadeThrowTimeLimit;
 
@@ -692,41 +655,16 @@ public class MainSceneController : Node2D
 				float maxStrength = 512f;
 				float strength = Mathf.Lerp(minStrength, maxStrength, per);
 
-				velocity = node_player.AimingDirection * strength;
+				Vector2 position = node_player.node_projectileSpawnPosition.GlobalPosition;
+				Vector2 velocity = node_player.AimingDirection * strength;
 
-				EPaintColor paintColor = node_player.PaintColor;
-				SpawnGrenade(position, velocity, paintColor);
+				SpawnGrenade(position, velocity, node_player.GrenadePaintColor);
 
 				node_player.GrenadeThrowTimer = 0f;
 			}
 		}
 
-		if (node_player.IsOnGround)
-		{
-			if (node_player.Velocity.x != 0)
-			{
-				node_player.node_animatedSprite.Play("walk");
-			}
-			else
-			{
-				node_player.node_animatedSprite.Play("idle");
-			}
-		}
-		else
-		{
-			node_player.node_animatedSprite.Play("jump");
-		}
-
-		if (!node_player.WasOnGround && node_player.IsOnGround)
-		{
-			PlaySound(ESound.PlayerLand);
-		}
-
-		node_player1UI_powerGauge.Value = node_player.PowerGaugeCurrent;
-		node_player1UI_grenadeCount.Text = node_player.NumberOfGrenades.ToString();
-		node_player1UI_rifleBulletCount.Text = node_player.RifleBullets.ToString();
-		node_player1UI_machineGunBulletCount.Text = node_player.MachineGunBullets.ToString();
-		node_player1UI_sniperRifleBulletCount.Text = node_player.SniperRifleBullets.ToString();
+		UpdateUI();
 	}
 
 	private void TickBullets (float delta)
@@ -820,7 +758,7 @@ public class MainSceneController : Node2D
 			}
 			else
 			{
-				CauseExplosion(grenade.Position, grenade.ExplosionRadius, grenade.PaintColor);
+				CauseExplosion(grenade.Position, grenade.ExplosionRadius, grenade.PaintColor, ESound.GrenadeExplode);
 
 				grenade.QueueFree();
 				node_grenades.RemoveChild(grenade);
@@ -830,33 +768,9 @@ public class MainSceneController : Node2D
 		}
 	}
 
-	private Bullet SpawnBullet (Vector2 position, Vector2 direction, EPaintColor paintColor, Player.EBulletType bulletType)
+	private void SpawnStandardBullet (Vector2 position, Vector2 direction, EPaintColor paintColor)
 	{
-		Bullet bullet;
-
-		switch (bulletType)
-		{
-			case Player.EBulletType.Standard:
-				bullet = m_standardBulletPackedScene.Instance<Bullet>();
-				PlaySound(ESound.StandardGunShoot);
-				break;
-			case Player.EBulletType.Rifle:
-				bullet = m_rifleBulletPackedScene.Instance<Bullet>();
-				PlaySound(ESound.RifleShoot);
-				break;
-			case Player.EBulletType.MachineGun:
-				bullet = m_machineGunBulletPackedScene.Instance<Bullet>();
-				PlaySound(ESound.MachineGunShoot);
-				break;
-			case Player.EBulletType.SniperRifle:
-				bullet = m_sniperRifleBulletPackedScene.Instance<Bullet>();
-				PlaySound(ESound.SniperRifleShoot);
-				break;
-			default:
-				bullet = m_standardBulletPackedScene.Instance<Bullet>();
-				PlaySound(ESound.StandardGunShoot);
-				break;
-		}
+		Bullet bullet = m_standardBulletPackedScene.Instance<Bullet>();
 
 		node_bullets.AddChild(bullet);
 		m_bulletsList.Add(bullet);
@@ -865,20 +779,61 @@ public class MainSceneController : Node2D
 		bullet.Velocity = direction * bullet.Speed;
 		bullet.SetPaintColor(paintColor);
 
-		return bullet;
+		PlaySound(ESound.StandardGunShoot);
 	}
 
-	private Grenade SpawnGrenade (Vector2 position, Vector2 velocity, EPaintColor paintColor)
+	private void SpawnRifleBullet (Vector2 position, Vector2 direction, EPaintColor paintColor)
+	{
+		Bullet bullet = m_rifleBulletPackedScene.Instance<Bullet>();
+
+		node_bullets.AddChild(bullet);
+		m_bulletsList.Add(bullet);
+
+		bullet.Position = position;
+		bullet.Velocity = direction * bullet.Speed;
+		bullet.SetPaintColor(paintColor);
+
+		PlaySound(ESound.RifleShoot);
+	}
+
+	private void SpawnMachineGunBullet (Vector2 position, Vector2 direction, EPaintColor paintColor)
+	{
+		Bullet bullet = m_machineGunBulletPackedScene.Instance<Bullet>();
+
+		node_bullets.AddChild(bullet);
+		m_bulletsList.Add(bullet);
+
+		bullet.Position = position;
+		bullet.Velocity = direction * bullet.Speed;
+		bullet.SetPaintColor(paintColor);
+
+		PlaySound(ESound.MachineGunShoot);
+	}
+
+	private void SpawnSniperRifleBullet (Vector2 position, Vector2 direction, EPaintColor paintColor)
+	{
+		Bullet bullet = m_sniperRifleBulletPackedScene.Instance<Bullet>();
+
+		node_bullets.AddChild(bullet);
+		m_bulletsList.Add(bullet);
+
+		bullet.Position = position;
+		bullet.Velocity = direction * bullet.Speed;
+		bullet.SetPaintColor(paintColor);
+
+		PlaySound(ESound.SniperRifleShoot);
+	}
+
+	private void SpawnGrenade (Vector2 position, Vector2 velocity, EPaintColor paintColor)
 	{
 		Grenade grenade = m_grenadePackedScene.Instance<Grenade>();
+
 		node_grenades.AddChild(grenade);
 		m_grenadesList.Add(grenade);
 
 		grenade.Position = position;
 		grenade.Velocity = velocity;
 		grenade.SetPaintColor(paintColor);
-
-		return grenade;
 	}
 
 	private void CauseExplosion (Vector2 position, float radius, EPaintColor paintColor)
@@ -910,6 +865,11 @@ public class MainSceneController : Node2D
 			}
 		}
 	}
+	private void CauseExplosion (Vector2 position, float radius, EPaintColor paintColor, ESound soundToPlay)
+	{
+		CauseExplosion(position, radius, paintColor);
+		PlaySound(soundToPlay);
+	}
 
 	private void PlaySound (ESound sound)
 	{
@@ -918,27 +878,31 @@ public class MainSceneController : Node2D
 		switch (sound)
 		{
 			case ESound.PlayerJump:
-				oneShotSound = m_playerJumpSound.Instance<OneShotSound>();
+				oneShotSound = m_playerJumpOneShotSoundPackedScene.Instance<OneShotSound>();
 				break;
 			case ESound.PlayerLand:
-				oneShotSound = m_playerLandSound.Instance<OneShotSound>();
+				oneShotSound = m_playerLandOneShotSoundPackedScene.Instance<OneShotSound>();
 				break;
 
 			case ESound.StandardGunShoot:
-				oneShotSound = m_standardGunShootSound.Instance<OneShotSound>();
+				oneShotSound = m_standardGunShootOneShotSoundPackedScene.Instance<OneShotSound>();
 				break;
+			case ESound.GrenadeExplode:
+				oneShotSound = m_grenadeExplodeOneShotSoundPackedScene.Instance<OneShotSound>();
+				break;
+
 			case ESound.RifleShoot:
-				oneShotSound = m_rifleShootSound.Instance<OneShotSound>();
+				oneShotSound = m_rifleShootOneShotSoundPackedScene.Instance<OneShotSound>();
 				break;
 			case ESound.MachineGunShoot:
-				oneShotSound = m_machineGunShootSound.Instance<OneShotSound>();
+				oneShotSound = m_machineGunShootOneShotSoundPackedScene.Instance<OneShotSound>();
 				break;
 			case ESound.SniperRifleShoot:
-				oneShotSound = m_sniperRifleShootSound.Instance<OneShotSound>();
+				oneShotSound = m_sniperRifleShootOneShotSoundPackedScene.Instance<OneShotSound>();
 				break;
 
 			default:
-				oneShotSound = m_playerJumpSound.Instance<OneShotSound>();
+				oneShotSound = m_playerJumpOneShotSoundPackedScene.Instance<OneShotSound>();
 				break;
 		}
 

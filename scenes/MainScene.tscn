@@ -1,4 +1,4 @@
-[gd_scene load_steps=28 format=2]
+[gd_scene load_steps=29 format=2]
 
 [ext_resource path="res://resources/tilesets/tileset_0001.tres" type="TileSet" id=1]
 [ext_resource path="res://scripts/MainSceneController.cs" type="Script" id=2]
@@ -25,6 +25,7 @@
 [ext_resource path="res://scenes/Sounds/Guns/OneShotSound_RifleShoot.tscn" type="PackedScene" id=23]
 [ext_resource path="res://scenes/Sounds/Guns/OneShotSound_SniperRifleShoot.tscn" type="PackedScene" id=24]
 [ext_resource path="res://scenes/Sounds/Guns/OneShotSound_StandardGunShoot.tscn" type="PackedScene" id=25]
+[ext_resource path="res://scenes/Sounds/Guns/OneShotSound_GenadeExplode.tscn" type="PackedScene" id=26]
 
 [sub_resource type="DynamicFontData" id=1]
 antialiased = false
@@ -41,17 +42,18 @@ __meta__ = {
 "_edit_lock_": true
 }
 m_standardBulletPackedScene = ExtResource( 8 )
+m_grenadePackedScene = ExtResource( 6 )
 m_rifleBulletPackedScene = ExtResource( 7 )
 m_machineGunBulletPackedScene = ExtResource( 9 )
 m_sniperRifleBulletPackedScene = ExtResource( 5 )
-m_grenadePackedScene = ExtResource( 6 )
 m_lightMaskPackedScene = ExtResource( 3 )
-m_playerJumpSound = ExtResource( 20 )
-m_playerLandSound = ExtResource( 21 )
-m_standardGunShootSound = ExtResource( 25 )
-m_rifleShootSound = ExtResource( 23 )
-m_machineGunShootSound = ExtResource( 22 )
-m_sniperRifleShootSound = ExtResource( 24 )
+m_playerJumpOneShotSoundPackedScene = ExtResource( 20 )
+m_playerLandOneShotSoundPackedScene = ExtResource( 21 )
+m_standardGunShootOneShotSoundPackedScene = ExtResource( 25 )
+m_grenadeExplodeOneShotSoundPackedScene = ExtResource( 26 )
+m_rifleShootOneShotSoundPackedScene = ExtResource( 23 )
+m_machineGunShootOneShotSoundPackedScene = ExtResource( 22 )
+m_sniperRifleShootOneShotSoundPackedScene = ExtResource( 24 )
 
 [node name="OneShotSounds" type="Node" parent="."]
 
@@ -254,6 +256,7 @@ align = 1
 valign = 1
 
 [node name="RifleUI" type="Control" parent="UI/Player1UI"]
+visible = false
 margin_top = 32.0
 margin_right = 32.0
 margin_bottom = 48.0
@@ -331,6 +334,7 @@ align = 1
 valign = 1
 
 [node name="PaintGlovesUI" type="Control" parent="UI/Player1UI"]
+visible = false
 margin_top = 48.0
 margin_right = 16.0
 margin_bottom = 64.0
@@ -342,6 +346,7 @@ texture = ExtResource( 19 )
 expand = true
 
 [node name="PaintShoesUI" type="Control" parent="UI/Player1UI"]
+visible = false
 margin_left = 16.0
 margin_top = 48.0
 margin_right = 32.0
@@ -354,6 +359,7 @@ texture = ExtResource( 18 )
 expand = true
 
 [node name="BigBadBootiesUI" type="Control" parent="UI/Player1UI"]
+visible = false
 margin_left = 32.0
 margin_top = 48.0
 margin_right = 48.0

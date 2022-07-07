@@ -9,7 +9,9 @@ public class Player : KinematicBody2D
 
 	public enum EFacingDirection { Left, Right }
 
-	public enum EBulletType { Standard, Rifle, MachineGun, SniperRifle }
+	//public enum EBulletType { Standard, Rifle, MachineGun, SniperRifle }
+
+	public enum EGunEquipSlot { None, Rifle, MachineGun, SniperRifle }
 
 	#endregion // Enums
 
@@ -30,7 +32,7 @@ public class Player : KinematicBody2D
 
 	[Export] public EPaintColor PaintColor { get; private set; } = EPaintColor.White;
 
-	public Vector2 Velocity { get; set; } = Vector2.Zero;
+	[Export] public Vector2 Velocity { get; set; } = Vector2.Zero;
 
 	[Export] public float MaxMoveSpeed { get; set; } = 128f;
 	[Export] public float MaxFallSpeed { get; set; } = 1024f;
@@ -42,18 +44,14 @@ public class Player : KinematicBody2D
 
 	[Export] public float MoveDeceleration { get; set; } = 1024f;
 
-	public int JumpCount { get; set; } = 0;
+	[Export] public int JumpCount { get; set; } = 0;
 	[Export] public int JumpLimit { get; set; } = 2;
 	[Export] public float JumpHeight { get; set; } = 32f;
 
-	public EFacingDirection FacingDirection { get; set; } = EFacingDirection.Right;
-
-	public Vector2 AimingDirection { get; set; } = Vector2.Zero;
+	[Export] public Vector2 AimingDirection { get; set; } = Vector2.Zero;
 
 	public bool IsOnGround { get; set; } = false;
 	public bool WasOnGround { get; set; } = false;
-	public bool IsJumping { get; set; } = false;
-	public bool IsFalling { get; set; } = false;
 
 	public bool IsMoveLeftPressed { get; set; } = false;
 	public bool IsMoveRightPressed { get; set; } = false;
@@ -84,42 +82,54 @@ public class Player : KinematicBody2D
 	public bool WasThrowGrenadeReleased { get; set; } = false;
 
 	[Export] public bool IsInfiniteJumps { get; set; } = true;
-	[Export] public bool IsInfiniteAmmo { get; set; } = true;
+
+	[Export] public bool IsInfinitePowerGauge { get; set; } = true;
+
 	[Export] public bool IsInfiniteGrenades { get; set; } = true;
 
+	[Export] public bool IsInfiniteRifleAmmunition { get; set; } = true;
+	[Export] public bool IsInfiniteMachineGunAmmunition { get; set; } = true;
+	[Export] public bool IsInfiniteSniperRifleAmmunition { get; set; } = true;
+
 	[Export] public bool HasRifle { get; set; } = false;
-	[Export] public EPaintColor RiflePaintColor { get; set; } = EPaintColor.White;
 	[Export] public bool HasMachineGun { get; set; } = false;
-	[Export] public EPaintColor MachineGunPaintColor { get; set; } = EPaintColor.White;
 	[Export] public bool HasSniperRifle { get; set; } = false;
-	[Export] public EPaintColor SniperRiflePaintColor { get; set; } = EPaintColor.White;
 
 	[Export] public bool HasPaintGloves { get; set; } = false;
-	[Export] public EPaintColor PaintGlovesColor { get; set; } = EPaintColor.White;
 	[Export] public bool HasPaintShoes { get; set; } = false;
-	[Export] public EPaintColor PaintShoesColor { get; set; } = EPaintColor.White;
 	[Export] public bool HasBigBadBooties { get; set; } = false;
-	[Export] public EPaintColor BigBadBootiesColor { get; set; } = EPaintColor.White;
 
-	[Export] public int NumberOfGrenades { get; set; } = 3;
-	[Export] public EPaintColor GunProjectileColor { get; set; } = EPaintColor.White;
-	[Export] public EPaintColor GrenadeColor { get; set; } = EPaintColor.White;
+	[Export] public EPaintColor PowerGaugePaintColor { get; set; } = EPaintColor.White;
+
+	[Export] public EPaintColor GrenadePaintColor { get; set; } = EPaintColor.White;
+
+	[Export] public EPaintColor RiflePaintColor { get; set; } = EPaintColor.White;
+	[Export] public EPaintColor MachineGunPaintColor { get; set; } = EPaintColor.White;
+	[Export] public EPaintColor SniperRiflePaintColor { get; set; } = EPaintColor.White;
+
+	[Export] public EPaintColor PaintGlovesPaintColor { get; set; } = EPaintColor.White;
+	[Export] public EPaintColor PaintShoesPaintColor { get; set; } = EPaintColor.White;
+	[Export] public EPaintColor BigBadBootiesPaintColor { get; set; } = EPaintColor.White;
 
 	[Export] public float GrenadeThrowTimeLimit { get; set; } = 1f;
 	[Export] public float GrenadeThrowTimer { get; set; } = 0f;
 
 	[Export] public float AimingLineLength { get; set; } = 16f;
 
-	[Export] public EBulletType BulletType { get; set; } = EBulletType.Standard;
+	//[Export] public EBulletType BulletType { get; set; } = EBulletType.Standard;
+	[Export] public EGunEquipSlot GunEquipSlot { get; set; } = EGunEquipSlot.None;
 
 	[Export] public float PowerGaugeLimit { get; set; } = 100f;
 	[Export] public float PowerGaugeCurrent { get; set; } = 100f;
 	[Export] public float PowerGaugeRechargeRate { get; set; } = 0.5f;
 
 	[Export] public float StandardBulletPowerCost { get; set; } = 10f;
-	[Export] public int RifleBullets { get; set; } = 8;
-	[Export] public int MachineGunBullets { get; set; } = 8;
-	[Export] public int SniperRifleBullets { get; set; } = 8;
+
+	[Export] public int GrenadesCount { get; set; } = 3;
+
+	[Export] public int RifleBulletsCount { get; set; } = 8;
+	[Export] public int MachineGunBulletsCount { get; set; } = 8;
+	[Export] public int SniperRifleBulletsCount { get; set; } = 8;
 
 	[Export] public float MachineGunFireRate { get; set; } = 0.1f;
 	[Export] public float MachineGunFireRateTimer { get; set; } = 0f;
@@ -146,6 +156,16 @@ public class Player : KinematicBody2D
 		Color color = PaintColors.GetColorFromPaintColor(PaintColor);
 		node_animatedSprite.SelfModulate = color;
 		node_aimingLine.DefaultColor = color;
+
+		PowerGaugePaintColor = PaintColor;
+		GrenadePaintColor = PaintColor;
+		RiflePaintColor = PaintColor;
+		MachineGunPaintColor = PaintColor;
+		SniperRiflePaintColor = PaintColor;
+		PaintGlovesPaintColor = PaintColor;
+		PaintShoesPaintColor = PaintColor;
+		BigBadBootiesPaintColor = PaintColor;
+
 		node_animatedSprite.Play("idle");
 	}
 
@@ -158,9 +178,19 @@ public class Player : KinematicBody2D
 	public void SetPaintColor (EPaintColor paintColor)
 	{
 		PaintColor = paintColor;
+
 		Color color = PaintColors.GetColorFromPaintColor(paintColor);
 		node_animatedSprite.SelfModulate = color;
 		node_aimingLine.DefaultColor = color;
+
+		PowerGaugePaintColor = PaintColor;
+		GrenadePaintColor = PaintColor;
+		RiflePaintColor = PaintColor;
+		MachineGunPaintColor = PaintColor;
+		SniperRiflePaintColor = PaintColor;
+		PaintGlovesPaintColor = PaintColor;
+		PaintShoesPaintColor = PaintColor;
+		BigBadBootiesPaintColor = PaintColor;
 	}
 
 	public void SetAimingLineDirection (Vector2 direction)
