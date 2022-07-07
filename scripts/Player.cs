@@ -48,10 +48,19 @@ public class Player : KinematicBody2D
 	[Export] public int JumpLimit { get; set; } = 2;
 	[Export] public float JumpHeight { get; set; } = 32f;
 
+	[Export] public Vector2 WallJumpDirection { get; set; } = new Vector2(1, -1f).Normalized();
+	[Export] public float WallJumpStrength { get; set; } = 256f;
+
 	[Export] public Vector2 AimingDirection { get; set; } = Vector2.Zero;
 
 	public bool IsOnGround { get; set; } = false;
 	public bool WasOnGround { get; set; } = false;
+
+	public bool IsOnWallLeft { get; set; } = false;
+	public bool IsOnWallRight { get; set; } = false;
+
+	public bool WasOnWallLeft { get; set; } = false;
+	public bool WasOnWallRight { get; set; } = false;
 
 	public bool IsMoveLeftPressed { get; set; } = false;
 	public bool IsMoveRightPressed { get; set; } = false;

@@ -413,8 +413,12 @@ public class MainSceneController : Node2D
 		node_player.IsThrowGrenadeReleased = false;
 
 		node_player.WasOnGround = node_player.IsOnGround;
+		node_player.WasOnWallLeft = node_player.IsOnWallLeft;
+		node_player.WasOnWallRight = node_player.IsOnWallRight;
 
 		node_player.IsOnGround = false;
+		node_player.IsOnWallLeft = false;
+		node_player.IsOnWallRight = false;
 
 		if (Input.IsActionPressed("PlayerMoveLeft"))
 			node_player.IsMoveLeftPressed = true;
@@ -450,11 +454,17 @@ public class MainSceneController : Node2D
 
 		if (node_player.IsMoveLeftPressed && !node_player.IsMoveRightPressed)
 		{
-			playerVelocity.x -= node_player.MoveAcceleration * delta;
+			if (playerVelocity.x > -node_player.MaxMoveSpeed)
+			{
+				playerVelocity.x -= node_player.MoveAcceleration * delta;
+			}
 		}
 		else if (!node_player.IsMoveLeftPressed && node_player.IsMoveRightPressed)
 		{
-			playerVelocity.x += node_player.MoveAcceleration * delta;
+			if (playerVelocity.x < node_player.MaxMoveSpeed)
+			{
+				playerVelocity.x += node_player.MoveAcceleration * delta;
+			}
 		}
 		else if ((node_player.IsMoveLeftPressed && node_player.IsMoveRightPressed) || (!node_player.IsMoveLeftPressed && !node_player.IsMoveRightPressed))
 		{
@@ -476,16 +486,18 @@ public class MainSceneController : Node2D
 			}
 		}
 
-		playerVelocity.x = Mathf.Clamp(playerVelocity.x, -node_player.MaxMoveSpeed, node_player.MaxMoveSpeed);
+		//playerVelocity.x = Mathf.Clamp(playerVelocity.x, -node_player.MaxMoveSpeed, node_player.MaxMoveSpeed);
 
 		if (!node_player.IsDownPressed)
 		{
-			float fallAcceleration = node_player.IsOnWall() ? node_player.WallSlideFallAcceleration : node_player.FallAcceleration;
+			bool wasOnWall = node_player.WasOnWallLeft || node_player.WasOnWallRight;
+			float fallAcceleration = wasOnWall ? node_player.WallSlideFallAcceleration : node_player.FallAcceleration;
 			playerVelocity.y += fallAcceleration * delta;
 		}
 		else
 		{
-			float fallAcceleration = node_player.IsOnWall() ? node_player.WallSlideFallAcceleration * 2f : node_player.HoldDownFallAcceleration;
+			bool wasOnWall = node_player.WasOnWallLeft || node_player.WasOnWallRight;
+			float fallAcceleration = wasOnWall ? node_player.WallSlideFallAcceleration * 2f : node_player.HoldDownFallAcceleration;
 			playerVelocity.y += fallAcceleration * delta;
 		}
 
@@ -496,13 +508,28 @@ public class MainSceneController : Node2D
 				if (!node_player.IsInfiniteJumps)
 					node_player.JumpCount++;
 
-				if (playerVelocity.y >= 0)
+				if (!node_player.WasOnGround && (node_player.WasOnWallLeft || node_player.WasOnWallRight))
 				{
-					playerVelocity.y = -Mathf.Sqrt(2 * node_player.FallAcceleration * node_player.JumpHeight);
+					int direction = 0;
+
+					if (node_player.WasOnWallLeft)
+						direction = 1;
+					else if (node_player.WasOnWallRight)
+						direction = -1;
+
+					playerVelocity.x = node_player.WallJumpDirection.x * direction * node_player.WallJumpStrength;
+					playerVelocity.y = node_player.WallJumpDirection.y * node_player.WallJumpStrength;
 				}
 				else
 				{
-					playerVelocity.y += -Mathf.Sqrt(2 * node_player.FallAcceleration * node_player.JumpHeight);
+					if (playerVelocity.y >= 0)
+					{
+						playerVelocity.y = -Mathf.Sqrt(2 * node_player.FallAcceleration * node_player.JumpHeight);
+					}
+					else
+					{
+						playerVelocity.y += -Mathf.Sqrt(2 * node_player.FallAcceleration * node_player.JumpHeight);
+					}
 				}
 
 				PlaySound(ESound.PlayerJump);
@@ -518,6 +545,18 @@ public class MainSceneController : Node2D
 		if (node_player.IsOnFloor())
 		{
 			node_player.IsOnGround = true;
+		}
+
+		if (node_player.IsOnWall())
+		{
+			for (int i = 0; i < node_player.GetSlideCount(); i++)
+			{
+				KinematicCollision2D collision = node_player.GetSlideCollision(i);
+				if (collision.Normal.x > 0)
+					node_player.IsOnWallLeft = true;
+				else if (collision.Normal.x < 0)
+					node_player.IsOnWallRight = true;
+			}
 		}
 
 		if (node_player.IsOnGround)

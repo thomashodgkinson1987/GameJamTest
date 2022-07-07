@@ -11,6 +11,7 @@ extents = Vector2( 4, 5.5 )
 
 [node name="Player" type="KinematicBody2D"]
 collision_mask = 50
+collision/safe_margin = 0.1
 script = ExtResource( 2 )
 IsInfiniteJumps = true
 IsInfinitePowerGauge = true
