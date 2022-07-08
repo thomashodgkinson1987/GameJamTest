@@ -9,8 +9,6 @@ public class Player : KinematicBody2D
 
 	public enum EFacingDirection { Left, Right }
 
-	//public enum EBulletType { Standard, Rifle, MachineGun, SniperRifle }
-
 	public enum EGunEquipSlot { None, Rifle, MachineGun, SniperRifle }
 
 	#endregion // Enums
@@ -29,6 +27,9 @@ public class Player : KinematicBody2D
 
 
 	#region Properties
+
+	[Export] public PackedScene JumpParticlesPackedScene { get; set; }
+	[Export] public PackedScene LandParticlesPackedScene { get; set; }
 
 	[Export] public EPaintColor PaintColor { get; private set; } = EPaintColor.White;
 

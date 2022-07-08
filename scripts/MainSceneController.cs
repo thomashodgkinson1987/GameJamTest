@@ -31,6 +31,9 @@ public class MainSceneController : Node2D
 
 	private Node2D node_lightMasks;
 
+	private Node2D node_playerJumpParticles;
+	private Node2D node_playerLandParticles;
+
 	private Node2D node_bulletSpawnParticles;
 	private Node2D node_grenadeSpawnParticles;
 
@@ -145,6 +148,9 @@ public class MainSceneController : Node2D
 		node_grenades = GetNode<Node2D>("Grenades");
 
 		node_lightMasks = GetNode<Node2D>("LightMasks");
+
+		node_playerJumpParticles = GetNode<Node2D>("PlayerJumpParticles");
+		node_playerLandParticles = GetNode<Node2D>("PlayerLandParticles");
 
 		node_bulletSpawnParticles = GetNode<Node2D>("BulletSpawnParticles");
 		node_grenadeSpawnParticles = GetNode<Node2D>("GrenadeSpawnParticles");
@@ -530,6 +536,20 @@ public class MainSceneController : Node2D
 					{
 						playerVelocity.y += -Mathf.Sqrt(2 * node_player.FallAcceleration * node_player.JumpHeight);
 					}
+					OneShotParticles jumpParticles = node_player.JumpParticlesPackedScene.Instance<OneShotParticles>();
+					node_playerJumpParticles.AddChild(jumpParticles);
+					jumpParticles.Position = node_player.Position;
+
+					Color color;
+
+					if (node_player.HasPaintShoes)
+						color = PaintColors.GetColorFromPaintColor(node_player.PaintShoesPaintColor);
+					else if (node_player.HasBigBadBooties)
+						color = PaintColors.GetColorFromPaintColor(node_player.BigBadBootiesPaintColor);
+					else
+						color = PaintColors.GetColorFromPaintColor(node_player.PaintColor);
+
+					jumpParticles.SelfModulate = color;
 				}
 
 				PlaySound(ESound.PlayerJump);
@@ -565,6 +585,21 @@ public class MainSceneController : Node2D
 			{
 				node_player.JumpCount = 0;
 				PlaySound(ESound.PlayerLand);
+
+				OneShotParticles landParticles = node_player.LandParticlesPackedScene.Instance<OneShotParticles>();
+				node_playerLandParticles.AddChild(landParticles);
+				landParticles.Position = node_player.Position;
+
+				Color color;
+
+				if (node_player.HasPaintShoes)
+					color = PaintColors.GetColorFromPaintColor(node_player.PaintShoesPaintColor);
+				else if (node_player.HasBigBadBooties)
+					color = PaintColors.GetColorFromPaintColor(node_player.BigBadBootiesPaintColor);
+				else
+					color = PaintColors.GetColorFromPaintColor(node_player.PaintColor);
+
+				landParticles.SelfModulate = color;
 			}
 
 			if (node_player.IsDownPressed && !node_player.WasDownPressed)
