@@ -142,6 +142,10 @@ public class Player : KinematicBody2D
 	[Export] public float DisableOneWayCollisionTime { get; set; } = 0.5f;
 	[Export] public float DisableOneWayCollisionTimer { get; set; } = 0f;
 
+	[Export] public float WallHugTime { get; set; } = 0.5f;
+	[Export] public float WallHugTimeTimer { get; set; } = 0f;
+	
+
 	#endregion // Properties
 
 

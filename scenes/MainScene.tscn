@@ -86,6 +86,11 @@ __meta__ = {
 "_edit_lock_": true
 }
 
+[node name="LightMasks" type="Node2D" parent="."]
+__meta__ = {
+"_edit_lock_": true
+}
+
 [node name="OneWayPlatforms" type="Node2D" parent="."]
 __meta__ = {
 "_edit_lock_": true
@@ -183,20 +188,7 @@ position = Vector2( 312, 200 )
 [node name="PickUp_Grenade3" parent="PickUps" instance=ExtResource( 33 )]
 position = Vector2( 104, 120 )
 
-[node name="Player" parent="." instance=ExtResource( 4 )]
-position = Vector2( 376, 280 )
-
-[node name="Bullets" type="Node2D" parent="."]
-__meta__ = {
-"_edit_lock_": true
-}
-
-[node name="Grenades" type="Node2D" parent="."]
-__meta__ = {
-"_edit_lock_": true
-}
-
-[node name="LightMasks" type="Node2D" parent="."]
+[node name="PlayerLandParticles" type="Node2D" parent="."]
 __meta__ = {
 "_edit_lock_": true
 }
@@ -206,7 +198,15 @@ __meta__ = {
 "_edit_lock_": true
 }
 
-[node name="PlayerLandParticles" type="Node2D" parent="."]
+[node name="Player" parent="." instance=ExtResource( 4 )]
+position = Vector2( 376, 280 )
+
+[node name="Bullets" type="Node2D" parent="."]
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="Grenades" type="Node2D" parent="."]
 __meta__ = {
 "_edit_lock_": true
 }

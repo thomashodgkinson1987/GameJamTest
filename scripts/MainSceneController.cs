@@ -24,15 +24,15 @@ public class MainSceneController : Node2D
 
 	private TileMap node_tileMap;
 
+	private Node2D node_lightMasks;
+
+	private Node2D node_playerLandParticles;
+	private Node2D node_playerJumpParticles;
+
 	private Player node_player;
 
 	private Node2D node_bullets;
 	private Node2D node_grenades;
-
-	private Node2D node_lightMasks;
-
-	private Node2D node_playerJumpParticles;
-	private Node2D node_playerLandParticles;
 
 	private Node2D node_bulletSpawnParticles;
 	private Node2D node_grenadeSpawnParticles;
@@ -142,15 +142,15 @@ public class MainSceneController : Node2D
 
 		node_tileMap = GetNode<TileMap>("TileMap");
 
+		node_lightMasks = GetNode<Node2D>("LightMasks");
+
+		node_playerLandParticles = GetNode<Node2D>("PlayerLandParticles");
+		node_playerJumpParticles = GetNode<Node2D>("PlayerJumpParticles");
+
 		node_player = GetNode<Player>("Player");
 
 		node_bullets = GetNode<Node2D>("Bullets");
 		node_grenades = GetNode<Node2D>("Grenades");
-
-		node_lightMasks = GetNode<Node2D>("LightMasks");
-
-		node_playerJumpParticles = GetNode<Node2D>("PlayerJumpParticles");
-		node_playerLandParticles = GetNode<Node2D>("PlayerLandParticles");
 
 		node_bulletSpawnParticles = GetNode<Node2D>("BulletSpawnParticles");
 		node_grenadeSpawnParticles = GetNode<Node2D>("GrenadeSpawnParticles");
@@ -302,10 +302,11 @@ public class MainSceneController : Node2D
 				{
 					LightMask lightMask = m_lightMaskPackedScene.Instance<LightMask>();
 					node_lightMasks.AddChild(lightMask);
-					Vector2 position = Vector2.Zero;
-					position.x = (x * m_tileWidth) + (m_tileWidth / 2f);
-					position.y = (y * m_tileHeight) + (m_tileHeight / 2f);
-					lightMask.Position = position;
+					lightMask.Position = new Vector2()
+					{
+						x = (x * m_tileWidth) + (m_tileWidth / 2f),
+						y = (y * m_tileHeight) + (m_tileHeight / 2f)
+					};
 					lightMask.Color = new Color(1, 1, 1, 1);
 
 					m_lightMasksArray[y, x] = lightMask;
@@ -322,7 +323,6 @@ public class MainSceneController : Node2D
 		UpdatePlayer1UI();
 		UpdateLevelDataUI();
 	}
-
 	private void UpdatePlayer1UI ()
 	{
 		node_player1UI_playerIcon.SelfModulate = PaintColors.GetColorFromPaintColor(node_player.PaintColor);
@@ -354,7 +354,6 @@ public class MainSceneController : Node2D
 		node_player1UI_bigBadBootiesUI.Visible = node_player.HasBigBadBooties;
 		node_player1UI_bigBadBootiesIcon.SelfModulate = PaintColors.GetColorFromPaintColor(node_player.BigBadBootiesPaintColor);
 	}
-
 	private void UpdateLevelDataUI ()
 	{
 		node_levelDataUI_whiteTileCountLabel.Text = m_whiteTileCount.ToString();
@@ -371,18 +370,15 @@ public class MainSceneController : Node2D
 		Color color = PaintColors.GetColorFromPaintColor(paintColor);
 		SetLightMaskColor(x, y, color);
 	}
-
 	private void SetLightMaskColor (int x, int y, Color color)
 	{
 		m_lightMasksArray[y, x].Color = color;
 	}
-
 	private void SetLightMaskColor (LightMask lightMask, EPaintColor paintColor)
 	{
 		Color color = PaintColors.GetColorFromPaintColor(paintColor);
 		SetLightMaskColor(lightMask, color);
 	}
-
 	private void SetLightMaskColor (LightMask lightMask, Color color)
 	{
 		lightMask.Color = color;
@@ -460,32 +456,44 @@ public class MainSceneController : Node2D
 
 		if (node_player.IsMoveLeftPressed && !node_player.IsMoveRightPressed)
 		{
-			if (playerVelocity.x > -node_player.MaxMoveSpeed)
+			if (node_player.WasOnWallRight)
+			{
+				node_player.WallHugTimeTimer += delta;
+				if (node_player.WallHugTimeTimer >= node_player.WallHugTime)
+				{
+					node_player.WallHugTimeTimer = 0f;
+					playerVelocity.x -= node_player.MoveAcceleration * delta;
+				}
+			}
+			else if (playerVelocity.x > -node_player.MaxMoveSpeed)
 			{
 				playerVelocity.x -= node_player.MoveAcceleration * delta;
 			}
 		}
 		else if (!node_player.IsMoveLeftPressed && node_player.IsMoveRightPressed)
 		{
-			if (playerVelocity.x < node_player.MaxMoveSpeed)
+			if (node_player.WasOnWallLeft)
+			{
+				node_player.WallHugTimeTimer += delta;
+				if (node_player.WallHugTimeTimer >= node_player.WallHugTime)
+				{
+					node_player.WallHugTimeTimer = 0f;
+					playerVelocity.x += node_player.MoveAcceleration * delta;
+				}
+			}
+			else if (playerVelocity.x < node_player.MaxMoveSpeed)
 			{
 				playerVelocity.x += node_player.MoveAcceleration * delta;
 			}
 		}
 		else if ((node_player.IsMoveLeftPressed && node_player.IsMoveRightPressed) || (!node_player.IsMoveLeftPressed && !node_player.IsMoveRightPressed))
 		{
-			if (playerVelocity.x < 0)
+			if (playerVelocity.x != 0)
 			{
-				playerVelocity.x += node_player.MoveDeceleration * delta;
-				if (playerVelocity.x > 0)
-				{
-					playerVelocity.x = 0;
-				}
-			}
-			else if (playerVelocity.x > 0)
-			{
-				playerVelocity.x -= node_player.MoveDeceleration * delta;
-				if (playerVelocity.x < 0)
+				int oldDirection = playerVelocity.x < 0 ? -1 : 1;
+				playerVelocity.x += node_player.MoveDeceleration * -oldDirection * delta;
+				int newDirection = playerVelocity.x < 0 ? -1 : playerVelocity.x > 0 ? 1 : 0;
+				if (oldDirection != newDirection)
 				{
 					playerVelocity.x = 0;
 				}
@@ -569,6 +577,10 @@ public class MainSceneController : Node2D
 
 		if (node_player.IsOnWall())
 		{
+			if (!node_player.WasOnWallLeft && !node_player.WasOnWallRight)
+			{
+				node_player.WallHugTimeTimer = 0f;
+			}
 			for (int i = 0; i < node_player.GetSlideCount(); i++)
 			{
 				KinematicCollision2D collision = node_player.GetSlideCollision(i);
@@ -776,9 +788,12 @@ public class MainSceneController : Node2D
 					}
 					break;
 				default:
-					if (node_player.PowerGaugeCurrent >= node_player.StandardBulletPowerCost)
+					if (node_player.PowerGaugeCurrent >= node_player.StandardBulletPowerCost || node_player.IsInfinitePowerGauge)
 					{
-						node_player.PowerGaugeCurrent -= node_player.StandardBulletPowerCost;
+						if (!node_player.IsInfinitePowerGauge)
+						{
+							node_player.PowerGaugeCurrent -= node_player.StandardBulletPowerCost;
+						}
 						SpawnStandardBullet(position, direction, node_player.PowerGaugePaintColor);
 					}
 					break;
@@ -834,10 +849,9 @@ public class MainSceneController : Node2D
 					node_player.GrenadesCount--;
 				}
 
-				float per = node_player.GrenadeThrowTimer / node_player.GrenadeThrowTimeLimit;
-
 				float minStrength = 64f;
 				float maxStrength = 512f;
+				float per = node_player.GrenadeThrowTimer / node_player.GrenadeThrowTimeLimit;
 				float strength = Mathf.Lerp(minStrength, maxStrength, per);
 
 				Vector2 position = node_player.node_projectileSpawnPosition.GlobalPosition;
